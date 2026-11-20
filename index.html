@@ -1,0 +1,3929 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Athenaeum Studio — Plataforma de Estudos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              wine: {
+                50: '#FDF6F7',
+                100: '#F9E8EC',
+                200: '#F0CDD5',
+                300: '#E0A3B1',
+                400: '#C96F85',
+                500: '#A9445D',
+                600: '#852940',
+                700: '#5E1926',
+                800: '#49121D',
+                900: '#360C15',
+                950: '#24070D',
+              },
+              latte: {
+                50: '#FCF9F6',
+                100: '#F6F1EA',
+                200: '#EDE3D7',
+                300: '#DFCDBA',
+                400: '#CBB299',
+                500: '#B09275',
+                600: '#8F7156',
+                700: '#6E5540',
+                800: '#4F3C2D',
+                900: '#33261C',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+              editorial: ['Georgia', 'Cambria', 'Times New Roman', 'serif'],
+            }
+          }
+        }
+      };
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #F6F1EA;
+      color: #33261C;
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #EDE3D7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #B09275;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5E1926;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilização direta e visível do seletor nativo de arquivos (nunca display:none) */
+    input[type="file"].native-upload-input::file-selector-button {
+      background-color: #5E1926;
+      color: #FCF9F6;
+      border: none;
+      padding: 0.6rem 1.1rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      font-size: 0.78rem;
+      cursor: pointer;
+      margin-right: 0.85rem;
+      transition: background-color 0.15s ease;
+    }
+    input[type="file"].native-upload-input::file-selector-button:hover {
+      background-color: #49121D;
+    }
+
+    /* 3D Flashcard Flip */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-resumo, #printable-resumo * {
+        visibility: visible;
+      }
+      #printable-resumo {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: #FFFFFF !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row bg-latte-100 text-latte-900 overflow-x-hidden">
+
+  <!-- ===================================================================== -->
+  <!-- BARRA LATERAL DE NAVEGAÇÃO, PERSISTÊNCIA & POMODORO                    -->
+  <!-- ===================================================================== -->
+  <aside class="w-full lg:w-72 bg-wine-700 text-latte-50 flex flex-col justify-between shrink-0 lg:min-h-screen shadow-xl relative z-30">
+    <div class="p-5">
+      <!-- Logotipo e Título -->
+      <div class="flex items-center justify-between lg:justify-start gap-3 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-latte-100 text-wine-700 flex items-center justify-center shadow-md shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="font-editorial font-bold text-lg tracking-tight text-latte-50 leading-tight">Athenaeum Studio</h1>
+            <p class="text-[11px] text-latte-300 font-medium">Faculdade & Estudos Livres</p>
+          </div>
+        </div>
+        <button type="button" id="mobile-menu-btn" class="lg:hidden px-3.5 py-2 rounded-xl bg-wine-800 hover:bg-wine-900 text-latte-100 text-xs font-bold border border-wine-600 cursor-pointer">
+          Menu ▾
+        </button>
+      </div>
+
+      <!-- Indicador de Persistência Blindada & Materiais Ativos -->
+      <div class="mb-5 p-3.5 rounded-2xl bg-wine-800/90 border border-wine-600/60 space-y-2">
+        <div class="flex items-center justify-between text-xs text-latte-300">
+          <span class="font-bold uppercase tracking-wider">Materiais Ativos</span>
+          <span id="sidebar-selected-count" class="bg-latte-100 text-wine-800 px-2 py-0.5 rounded-full font-extrabold text-[11px]">0 itens</span>
+        </div>
+        <p id="sidebar-selected-names" class="text-xs text-latte-100/90 line-clamp-2 leading-relaxed">
+          Envie seus materiais na Aba 1. Eles ficam salvos automaticamente mesmo ao atualizar a página.
+        </p>
+        <div class="pt-1.5 border-t border-wine-600/50 flex items-center justify-between text-[10px]">
+          <span id="persistence-status-badge" class="flex items-center gap-1.5 text-emerald-300 font-bold">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+            Salvo automaticamente
+          </span>
+          <span id="storage-usage-label" class="text-latte-300 font-semibold">0 arq.</span>
+        </div>
+      </div>
+
+      <!-- Menu Principal -->
+      <nav id="main-nav" class="flex flex-col space-y-1.5 relative z-30">
+        <button type="button" data-nav="acervo" onclick="window.switchTab && window.switchTab('acervo')" class="nav-btn cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-sm font-semibold transition bg-latte-100 text-wine-800 shadow-sm">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+            <span>1. Matérias & Acervo</span>
+          </span>
+        </button>
+
+        <button type="button" data-nav="questoes" onclick="window.switchTab && window.switchTab('questoes')" class="nav-btn cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-sm font-semibold transition text-latte-100 hover:bg-wine-800">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>2. Questões Variadas (50+)</span>
+          </span>
+        </button>
+
+        <button type="button" data-nav="raiox" onclick="window.switchTab && window.switchTab('raiox')" class="nav-btn cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-sm font-semibold transition text-latte-100 hover:bg-wine-800">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span>3. Raio-X dos Erros</span>
+          </span>
+          <span id="nav-wrong-badge" class="hidden px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold">0</span>
+        </button>
+
+        <button type="button" data-nav="flashcards" onclick="window.switchTab && window.switchTab('flashcards')" class="nav-btn cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-sm font-semibold transition text-latte-100 hover:bg-wine-800">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <span>4. Flashcards (Anki)</span>
+          </span>
+        </button>
+
+        <button type="button" data-nav="planejamento" onclick="window.switchTab && window.switchTab('planejamento')" class="nav-btn cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-sm font-semibold transition text-latte-100 hover:bg-wine-800">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>5. Cronograma & Checklist</span>
+          </span>
+        </button>
+
+        <button type="button" data-nav="resumo" onclick="window.switchTab && window.switchTab('resumo')" class="nav-btn cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-sm font-semibold transition text-latte-100 hover:bg-wine-800">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>6. Resumo Flash</span>
+          </span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Backup JSON & Timer Pomodoro -->
+    <div class="p-5 border-t border-wine-600/60 bg-wine-800/70 space-y-4">
+      <div class="space-y-1.5">
+        <span class="block text-[10px] font-bold uppercase tracking-wider text-latte-300">Cópia de Segurança (.JSON)</span>
+        <div class="flex flex-col gap-1.5">
+          <button type="button" id="export-backup-btn" class="cursor-pointer w-full py-1.5 px-2.5 rounded-xl bg-wine-900 hover:bg-wine-950 text-latte-100 text-[11px] font-bold border border-wine-600 transition">
+            Exportar Backup (.JSON)
+          </button>
+          <div class="bg-wine-900/90 border border-wine-600 rounded-xl p-1.5">
+            <span class="block text-[10px] text-latte-300 font-semibold mb-1">Restaurar Backup:</span>
+            <input type="file" id="import-backup-input" accept=".json,application/json" class="w-full text-[10px] text-latte-100 cursor-pointer" />
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-wine-600/40">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-latte-300">Timer Pomodoro</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-wine-900 text-latte-200 font-semibold">Foco 25m</span>
+        </div>
+        <div id="pomodoro-display" class="font-mono text-2xl font-extrabold text-latte-50 tracking-wider mb-2">25:00</div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="pomodoro-start-btn" class="cursor-pointer flex-1 py-1.5 px-3 rounded-xl bg-latte-100 hover:bg-white text-wine-800 font-bold text-xs transition">
+            Iniciar
+          </button>
+          <button type="button" id="pomodoro-reset-btn" class="cursor-pointer py-1.5 px-3 rounded-xl bg-wine-900 hover:bg-wine-950 text-latte-200 font-semibold text-xs border border-wine-600 transition">
+            Zerar
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================================================================== -->
+  <!-- CONTEÚDO PRINCIPAL                                                    -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full space-y-6 relative z-10">
+
+    <!-- Cabeçalho Superior + Pílulas de Seleção Rápida -->
+    <header class="bg-latte-50 border border-latte-300 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 id="header-title" class="text-xl sm:text-2xl font-editorial font-bold text-wine-800">Matérias & Acervo de Estudos</h2>
+          <p id="header-subtitle" class="text-xs sm:text-sm text-latte-700 mt-0.5">Envie seus PDFs, documentos, textos ou imagens uma única vez aqui. O texto escrito é extraído na hora e fica salvo ao atualizar a página.</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0 flex-wrap">
+          <span class="px-3.5 py-2 rounded-xl bg-latte-200 text-latte-900 border border-latte-300 text-xs font-bold">
+            Selecionados: <span id="header-selected-count" class="text-wine-700">0</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Barra de Pílulas dos Materiais Já Enviados -->
+      <div class="pt-2.5 border-t border-latte-200 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+        <span class="font-bold text-wine-800 shrink-0">Acervo salvo:</span>
+        <div id="global-quick-pills" class="flex items-center gap-1.5 flex-nowrap"></div>
+      </div>
+    </header>
+
+    <!-- =================================================================== -->
+    <!-- ABA 1: MATÉRIAS & ACERVO (UPLOAD NATIVO VISÍVEL + LEITURA IMEDIATA) -->
+    <!-- =================================================================== -->
+    <section id="tab-acervo" class="space-y-6 fade-in">
+
+      <!-- Cartão de Envio Único -->
+      <div class="bg-latte-50 border border-latte-300 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-latte-200">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full bg-wine-100 text-wine-800 text-[11px] font-bold mb-1">Envio Único & Persistente</span>
+            <h3 class="text-lg font-editorial font-bold text-latte-900">Adicionar PDF, Documento, Imagem ou Texto</h3>
+            <p class="text-xs text-latte-700">Digite livremente o nome da sua matéria (faculdade ou estudo pessoal) ou deixe em branco para salvar em <strong>Outros</strong>.</p>
+          </div>
+          <div class="flex rounded-xl bg-latte-200 p-1 text-xs font-bold shrink-0">
+            <button type="button" id="mode-file-btn" class="cursor-pointer px-3.5 py-1.5 rounded-lg bg-wine-700 text-white transition">Subir Arquivo (PDF / Doc / Img)</button>
+            <button type="button" id="mode-manual-btn" class="cursor-pointer px-3.5 py-1.5 rounded-lg text-latte-800 hover:text-wine-800 transition">+ Criar por Texto Colado</button>
+          </div>
+        </div>
+
+        <!-- Campos de Matéria Livre e Categoria -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="input-subject-name" class="block text-xs font-bold text-latte-800 mb-1">Matéria (escreva livremente ou deixe vazio para "Outros")</label>
+            <input type="text" id="input-subject-name" list="datalist-subjects" placeholder="Ex: Anatomia, Cálculo I, Direito Penal, Filosofia..." class="w-full px-3.5 py-2.5 rounded-xl bg-latte-100 border border-latte-300 text-sm text-latte-900 focus:outline-none focus:border-wine-700" />
+            <datalist id="datalist-subjects"></datalist>
+          </div>
+          <div>
+            <label for="select-subject-category" class="block text-xs font-bold text-latte-800 mb-1">Categoria de Estudo</label>
+            <select id="select-subject-category" class="w-full px-3.5 py-2.5 rounded-xl bg-latte-100 border border-latte-300 text-sm text-latte-900 focus:outline-none focus:border-wine-700">
+              <option value="Outros">Outros (Padrão)</option>
+              <option value="Faculdade">Faculdade</option>
+              <option value="Estudo Livre">Estudo Livre</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- MODO 1: Dropzone + Seletor Nativo Visível (100% compatível com Tablet/Mobile/Iframe) -->
+        <div id="box-upload-file" class="space-y-3">
+          <div id="vault-dropzone" class="rounded-2xl border-2 border-dashed border-wine-400 bg-latte-100/90 p-5 sm:p-6 space-y-4 transition">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-wine-700 text-latte-50 flex items-center justify-center shadow-sm shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              </div>
+              <div class="space-y-1 flex-1">
+                <p class="font-editorial font-bold text-base text-latte-900">Selecione, arraste ou cole seu material de estudo abaixo</p>
+                <p class="text-xs text-latte-700">Suporta <strong>PDF</strong>, <strong>DOCX / ODT</strong>, <strong>TXT / MD / CSV / HTML / RTF</strong> e <strong>Imagens (PNG, JPG, WEBP)</strong>. O conteúdo escrito é extraído e exibido imediatamente.</p>
+              </div>
+            </div>
+
+            <!-- Controles de Anexo Desbloqueados (Nativo + API Moderna + Área de Transferência) -->
+            <div class="p-4 rounded-xl bg-latte-50 border-2 border-latte-300 space-y-3">
+              <div>
+                <label for="fileInput" class="block text-xs font-extrabold text-wine-800 mb-1.5">
+                  1. Seletor Padrão do Dispositivo (toque em "Escolher arquivo"):
+                </label>
+                <input
+                  type="file"
+                  id="fileInput"
+                  multiple
+                  onchange="window.__athenaeumHandleFiles && window.__athenaeumHandleFiles(this.files, this)"
+                  class="native-upload-input static block w-full text-xs sm:text-sm text-latte-950 bg-white border border-latte-400 rounded-xl p-2.5 font-semibold cursor-pointer"
+                />
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-latte-200">
+                <button type="button" id="modern-picker-btn" class="cursor-pointer px-3.5 py-2 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition shadow-xs">
+                  2. Selecionar Arquivo (API Moderna)
+                </button>
+                <button type="button" id="clipboard-import-btn" class="cursor-pointer px-3.5 py-2 rounded-xl bg-latte-200 hover:bg-latte-300 text-wine-900 border border-latte-300 text-xs font-bold transition">
+                  3. Colar da Área de Transferência
+                </button>
+                <button type="button" id="quick-switch-manual-btn" class="cursor-pointer px-3.5 py-2 rounded-xl bg-latte-100 hover:bg-latte-200 text-latte-800 border border-latte-300 text-xs font-bold transition">
+                  4. Digitar / Colar Texto Direto
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de Diagnóstico ao Vivo -->
+          <div id="upload-status-bar" class="p-3.5 rounded-xl bg-latte-200/80 border border-latte-300 text-xs font-semibold text-latte-800 flex items-center justify-between gap-2">
+            <span id="upload-diagnostic-text">Pronto para anexar: escolha um arquivo acima, arraste para a caixa ou cole seu texto.</span>
+            <span id="upload-diagnostic-badge" class="px-2 py-0.5 rounded-full bg-latte-50 border border-latte-300 text-[10px] font-bold text-wine-800 shrink-0">Aguardando</span>
+          </div>
+        </div>
+
+        <!-- MODO 2: Digitar / Colar Texto Direto -->
+        <div id="box-upload-manual" class="hidden space-y-3 p-4 rounded-2xl bg-latte-100 border border-latte-300">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="manual-format" class="block text-xs font-bold text-latte-800 mb-1">Tipo</label>
+              <select id="manual-format" class="w-full px-3 py-2 rounded-xl bg-white border border-latte-300 text-xs font-bold text-latte-900">
+                <option value="Texto">Texto / Resumo</option>
+                <option value="Livro">Livro / Capítulo</option>
+                <option value="PDF">Trecho de PDF</option>
+                <option value="Anotação">Anotação de Aula</option>
+              </select>
+            </div>
+            <div>
+              <label for="manual-title" class="block text-xs font-bold text-latte-800 mb-1">Título do Material *</label>
+              <input type="text" id="manual-title" placeholder="Ex: Capítulo 2 - Introdução" class="w-full px-3 py-2 rounded-xl bg-white border border-latte-300 text-xs text-latte-900" />
+            </div>
+            <div>
+              <label for="manual-ref" class="block text-xs font-bold text-latte-800 mb-1">Referência / Página (Opcional)</label>
+              <input type="text" id="manual-ref" placeholder="Ex: Págs. 12 a 28" class="w-full px-3 py-2 rounded-xl bg-white border border-latte-300 text-xs text-latte-900" />
+            </div>
+          </div>
+          <div>
+            <label for="manual-body" class="block text-xs font-bold text-latte-800 mb-1">Cole ou escreva o texto completo do estudo *</label>
+            <textarea id="manual-body" rows="6" placeholder="Cole aqui o texto do seu PDF, livro ou anotação..." class="w-full p-3 rounded-xl bg-white border border-latte-300 text-xs sm:text-sm text-latte-900 leading-relaxed focus:outline-none focus:border-wine-700"></textarea>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="save-manual-btn" class="cursor-pointer px-5 py-2.5 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition shadow-sm">
+              Salvar Texto no Acervo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Painel Imediato do Último Arquivo Lido (Aparece logo após upload) -->
+      <div id="latest-extracted-banner" class="hidden bg-latte-50 border-2 border-wine-600 rounded-2xl p-5 shadow-sm space-y-3 fade-in">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-latte-200">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full bg-wine-700 text-white text-[10px] font-bold uppercase">Texto Extraído Agora</span>
+            <h4 id="latest-extracted-title" class="font-editorial font-bold text-base text-wine-900">Arquivo</h4>
+            <span id="latest-extracted-stats" class="text-xs font-semibold text-latte-600"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="latest-edit-btn" class="cursor-pointer px-3 py-1.5 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition">
+              Editar / Completar Texto
+            </button>
+            <button type="button" id="latest-close-btn" class="cursor-pointer px-2.5 py-1.5 rounded-xl bg-latte-200 hover:bg-latte-300 text-latte-800 text-xs font-bold">
+              Ocultar ✕
+            </button>
+          </div>
+        </div>
+        <div id="latest-extracted-content" class="max-h-56 overflow-y-auto p-3.5 rounded-xl bg-latte-100 border border-latte-300 text-xs sm:text-sm text-latte-900 whitespace-pre-wrap leading-relaxed"></div>
+      </div>
+
+      <!-- Barra de Filtros por Categoria -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" data-cat="all" class="cat-pill cursor-pointer px-3.5 py-1.5 rounded-full text-xs font-bold bg-wine-700 text-white transition">Todas as Matérias</button>
+          <button type="button" data-cat="Faculdade" class="cat-pill cursor-pointer px-3.5 py-1.5 rounded-full text-xs font-bold bg-latte-200 text-latte-800 hover:bg-latte-300 transition">Faculdade</button>
+          <button type="button" data-cat="Estudo Livre" class="cat-pill cursor-pointer px-3.5 py-1.5 rounded-full text-xs font-bold bg-latte-200 text-latte-800 hover:bg-latte-300 transition">Estudo Livre</button>
+          <button type="button" data-cat="Outros" class="cat-pill cursor-pointer px-3.5 py-1.5 rounded-full text-xs font-bold bg-latte-200 text-latte-800 hover:bg-latte-300 transition">Outros</button>
+        </div>
+        <div class="flex items-center gap-3 text-xs">
+          <button type="button" data-bulk-select="true" class="cursor-pointer font-bold text-wine-700 hover:underline">Selecionar Todos</button>
+          <button type="button" data-bulk-select="false" class="cursor-pointer font-semibold text-latte-600 hover:underline">Limpar Seleção</button>
+        </div>
+      </div>
+
+      <!-- Grid de Matérias & Cartões de Materiais -->
+      <div id="vault-subjects-list" class="space-y-5"></div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 2: QUESTÕES VARIADAS (50+ & 15 COMENTADAS — 100% NO TEXTO)      -->
+    <!-- =================================================================== -->
+    <section id="tab-questoes" class="hidden space-y-6 fade-in">
+      <div class="bg-latte-50 border border-latte-300 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-latte-200">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full bg-wine-100 text-wine-800 text-[11px] font-bold mb-1">8 Formatos Diversos • 100% Baseado no Texto • Gabarito Oculto</span>
+            <h3 class="text-lg font-editorial font-bold text-latte-900">Questões Variadas (50+) & 15 Comentadas</h3>
+            <p class="text-xs text-latte-700">Cada questão é extraída diretamente das frases, definições, relações de causa/efeito, contrastes e termos do material selecionado. O gabarito só aparece ao clicar em uma alternativa.</p>
+          </div>
+          <div class="flex flex-wrap items-end gap-2.5 shrink-0">
+            <div>
+              <label for="quiz-count" class="block text-[10px] font-bold uppercase text-latte-700 mb-1">Quantidade</label>
+              <select id="quiz-count" class="px-3 py-2 rounded-xl bg-latte-100 border border-latte-300 text-xs font-bold text-latte-900">
+                <option value="15">15 Questões Comentadas</option>
+                <option value="30">30 Questões Variadas</option>
+                <option value="55" selected>55 Questões (Maratona 50+)</option>
+                <option value="65">65 Questões Completas</option>
+              </select>
+            </div>
+            <div>
+              <label for="quiz-style" class="block text-[10px] font-bold uppercase text-latte-700 mb-1">Diversidade</label>
+              <select id="quiz-style" class="px-3 py-2 rounded-xl bg-latte-100 border border-latte-300 text-xs font-bold text-latte-900">
+                <option value="mixed">Máxima Diversidade (8 Tipos)</option>
+                <option value="mc">Múltipla Escolha & Incorreta</option>
+                <option value="cloze">Lacunas & Conceitos do Texto</option>
+                <option value="causal">Causa, Contraste & Estudo de Caso</option>
+                <option value="tf">Certo ou Errado (Assertivas)</option>
+              </select>
+            </div>
+            <button type="button" id="generate-quiz-btn" class="cursor-pointer px-4 py-2 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition shadow-sm">
+              Gerar Questões do Texto
+            </button>
+          </div>
+        </div>
+
+        <!-- Seletor Direto dos Materiais Já Enviados -->
+        <div id="picker-questoes"></div>
+      </div>
+
+      <!-- Placar em Tempo Real -->
+      <div id="quiz-scoreboard" class="hidden bg-latte-50 border border-latte-300 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4 text-xs font-bold">
+          <span class="text-latte-800">Respondidas: <span id="score-answered" class="text-wine-700">0/0</span></span>
+          <span class="text-emerald-700">Acertos: <span id="score-correct">0</span></span>
+          <span class="text-rose-700">Erros: <span id="score-wrong">0</span></span>
+        </div>
+        <button type="button" data-nav="raiox" class="cursor-pointer px-3.5 py-1.5 rounded-xl bg-wine-100 hover:bg-wine-200 text-wine-800 text-xs font-bold transition">
+          Abrir Raio-X dos Erros →
+        </button>
+      </div>
+
+      <!-- Lista de Questões -->
+      <div id="quiz-list" class="space-y-4"></div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 3: RAIO-X DOS ERROS & PLANO DE REVISÃO                          -->
+    <!-- =================================================================== -->
+    <section id="tab-raiox" class="hidden space-y-6 fade-in">
+      <div class="bg-latte-50 border border-latte-300 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 class="text-lg font-editorial font-bold text-latte-900">Raio-X dos Erros & Plano de Revisão Prioritário</h3>
+          <p class="text-xs text-latte-700 mt-0.5">Captura automaticamente as questões erradas, calcula sua taxa de acerto por matéria e monta o plano começando pelos pontos mais fracos.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <button type="button" id="retry-wrong-btn" class="cursor-pointer px-4 py-2 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition shadow-sm">
+            Refazer Questões Erradas
+          </button>
+          <button type="button" id="clear-errors-btn" class="cursor-pointer px-3.5 py-2 rounded-xl bg-latte-200 hover:bg-latte-300 text-latte-800 text-xs font-bold transition">
+            Limpar Histórico
+          </button>
+        </div>
+      </div>
+
+      <div id="raiox-container" class="space-y-6"></div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 4: FLASHCARDS (3D FLIP + FRENTE;VERSO PARA ANKI)                -->
+    <!-- =================================================================== -->
+    <section id="tab-flashcards" class="hidden space-y-6 fade-in">
+      <div class="bg-latte-50 border border-latte-300 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-latte-200">
+          <div>
+            <h3 class="text-lg font-editorial font-bold text-latte-900">Flashcards Ativos & Exportação Anki</h3>
+            <p class="text-xs text-latte-700 mt-0.5">Clique nos materiais já enviados abaixo para gerar flashcards (uma ideia por card, citando a fonte) no formato <code class="px-1.5 py-0.5 rounded bg-latte-200 text-wine-800 font-mono">Frente;Verso</code>.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button type="button" id="generate-fc-btn" class="cursor-pointer px-4 py-2 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition shadow-sm">
+              Gerar Flashcards
+            </button>
+            <button type="button" id="copy-anki-btn" class="cursor-pointer px-3.5 py-2 rounded-xl bg-latte-200 hover:bg-latte-300 text-latte-900 text-xs font-bold transition">
+              Copiar Frente;Verso
+            </button>
+            <button type="button" id="download-anki-btn" class="cursor-pointer px-3.5 py-2 rounded-xl bg-latte-200 hover:bg-latte-300 text-latte-900 text-xs font-bold transition">
+              Baixar .TXT (Anki)
+            </button>
+          </div>
+        </div>
+
+        <!-- Seletor Direto dos Materiais Já Enviados -->
+        <div id="picker-flashcards"></div>
+      </div>
+
+      <!-- Palco Interativo 3D -->
+      <div id="flashcards-stage"></div>
+
+      <!-- Lista Completa Frente;Verso -->
+      <div id="flashcards-export-box" class="hidden bg-latte-50 border border-latte-300 rounded-2xl p-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="font-editorial font-bold text-sm text-wine-800">Arquivo Pronto para Importar no Anki (Frente;Verso)</h4>
+          <span id="flashcards-count-badge" class="text-xs font-bold text-latte-600">0 cards</span>
+        </div>
+        <pre id="flashcards-raw-text" class="p-4 rounded-xl bg-latte-100 border border-latte-300 text-xs font-mono text-latte-900 overflow-x-auto whitespace-pre-wrap max-h-72"></pre>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 5: CRONOGRAMA (7/15/30 DIAS) & CHECKLIST DE ESTUDOS             -->
+    <!-- =================================================================== -->
+    <section id="tab-planejamento" class="hidden space-y-8 fade-in">
+      <!-- Checklist Interativo com Sub-itens -->
+      <div class="space-y-4">
+        <div class="bg-latte-50 border border-latte-300 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full bg-wine-100 text-wine-800 text-[11px] font-bold mb-1">Progresso de Estudos</span>
+            <h3 class="text-lg font-editorial font-bold text-latte-900">Checklist de Matérias & Tópicos Estudados</h3>
+            <p class="text-xs text-latte-700 mt-0.5">Crie um tópico/bloco e liste as matérias ou tarefas dentro dele para marcar conforme for concluindo.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="chk-topic-name" class="block text-xs font-bold text-latte-800 mb-1">Nome do Tópico / Bloco *</label>
+              <input type="text" id="chk-topic-name" placeholder="Ex: Unidade 1 - Provas" class="w-full px-3.5 py-2 rounded-xl bg-latte-100 border border-latte-300 text-sm text-latte-900 focus:outline-none focus:border-wine-700" />
+            </div>
+            <div class="sm:col-span-2">
+              <label for="chk-subitems-list" class="block text-xs font-bold text-latte-800 mb-1">Matérias / Subitens (separados por vírgula)</label>
+              <div class="flex gap-2">
+                <input type="text" id="chk-subitems-list" placeholder="Ex: Leitura Cap. 1, Fichamento Aula 2, Lista de Exercícios" class="flex-1 px-3.5 py-2 rounded-xl bg-latte-100 border border-latte-300 text-sm text-latte-900 focus:outline-none focus:border-wine-700" />
+                <button type="button" id="add-chk-topic-btn" class="cursor-pointer px-4 py-2 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition shrink-0">
+                  Criar Tópico
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="checklist-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- Cronograma Verticalizado com Revisões 7, 15 e 30 dias -->
+      <div class="space-y-4">
+        <div class="bg-latte-50 border border-latte-300 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full bg-wine-100 text-wine-800 text-[11px] font-bold mb-1">Repetição Espaçada</span>
+            <h3 class="text-lg font-editorial font-bold text-latte-900">Cronograma de Estudos & Revisões (7, 15 e 30 dias)</h3>
+            <p class="text-xs text-latte-700 mt-0.5">Distribui suas matérias e materiais até a data da prova ou entrega conforme suas horas diárias e agenda revisões automáticas em 7, 15 e 30 dias.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="sched-deadline" class="block text-xs font-bold text-latte-800 mb-1">Data da Prova / Entrega</label>
+              <input type="date" id="sched-deadline" class="w-full px-3.5 py-2 rounded-xl bg-latte-100 border border-latte-300 text-sm text-latte-900 focus:outline-none focus:border-wine-700" />
+            </div>
+            <div>
+              <label for="sched-hours" class="block text-xs font-bold text-latte-800 mb-1">Horas por Dia</label>
+              <input type="number" id="sched-hours" min="0.5" max="16" step="0.5" value="2.5" class="w-full px-3.5 py-2 rounded-xl bg-latte-100 border border-latte-300 text-sm text-latte-900 focus:outline-none focus:border-wine-700" />
+            </div>
+            <div class="flex items-end">
+              <button type="button" id="generate-sched-btn" class="cursor-pointer w-full py-2.5 px-4 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition shadow-sm">
+                Gerar Cronograma & Revisões
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="schedule-grid" class="space-y-4"></div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 6: RESUMO FLASH (ATÉ 10 PÁGINAS & PEGADINHAS)                    -->
+    <!-- =================================================================== -->
+    <section id="tab-resumo" class="hidden space-y-6 fade-in">
+      <div class="bg-latte-50 border border-latte-300 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-latte-200">
+          <div>
+            <h3 class="text-lg font-editorial font-bold text-latte-900">Resumo Flash — Pontos Importantes & Pegadinhas</h3>
+            <p class="text-xs text-latte-700 mt-0.5">Clique nos materiais já enviados abaixo para sintetizar exclusivamente o conteúdo deles (até 10 páginas), destacando conceitos-chave e pegadinhas.</p>
+          </div>
+          <div class="flex flex-wrap items-end gap-2 shrink-0">
+            <div>
+              <label for="resumo-max-pages" class="block text-[10px] font-bold uppercase text-latte-700 mb-1">Limite de Páginas</label>
+              <select id="resumo-max-pages" class="px-3 py-2 rounded-xl bg-latte-100 border border-latte-300 text-xs font-bold text-latte-900">
+                <option value="2">Máx. 2 páginas (Rápido)</option>
+                <option value="5" selected>Máx. 5 páginas (Equilibrado)</option>
+                <option value="10">Máx. 10 páginas (Completo)</option>
+              </select>
+            </div>
+            <button type="button" id="generate-resumo-btn" class="cursor-pointer px-4 py-2 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition shadow-sm">
+              Gerar Resumo
+            </button>
+            <button type="button" id="print-resumo-btn" class="cursor-pointer px-3.5 py-2 rounded-xl bg-latte-200 hover:bg-latte-300 text-latte-900 text-xs font-bold transition">
+              Imprimir / Salvar PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Seletor Direto dos Materiais Já Enviados -->
+        <div id="picker-resumo"></div>
+      </div>
+
+      <!-- Documento Editorial do Resumo -->
+      <div id="printable-resumo" class="bg-latte-50 border border-latte-300 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6"></div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL DE LEITURA & EDIÇÃO DE TEXTO EXTRAÍDO                           -->
+  <!-- ===================================================================== -->
+  <div id="reader-modal" class="fixed inset-0 z-50 hidden bg-wine-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-latte-50 border border-latte-300 rounded-2xl max-w-3xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 bg-wine-700 text-latte-50 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <span id="modal-mat-badge" class="inline-block px-2 py-0.5 rounded bg-wine-900 text-latte-200 text-[10px] font-bold uppercase mb-0.5">PDF</span>
+          <h4 id="modal-mat-title" class="font-editorial font-bold text-base truncate">Título do Material</h4>
+        </div>
+        <button type="button" id="close-reader-modal-btn" class="cursor-pointer px-3 py-1.5 rounded-xl bg-wine-800 hover:bg-wine-900 text-xs font-bold text-latte-100">
+          Fechar ✕
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4 flex-1">
+        <div id="modal-image-preview" class="hidden"></div>
+        <div>
+          <label for="modal-mat-textarea" class="block text-xs font-bold text-latte-800 mb-1.5">
+            Texto extraído / conteúdo de estudo (você pode revisar ou complementar livremente — salvo automaticamente):
+          </label>
+          <textarea id="modal-mat-textarea" rows="12" class="w-full p-3.5 rounded-xl bg-latte-100 border border-latte-300 text-xs sm:text-sm text-latte-900 leading-relaxed focus:outline-none focus:border-wine-700"></textarea>
+        </div>
+      </div>
+
+      <div class="px-5 py-3.5 bg-latte-200/80 border-t border-latte-300 flex flex-wrap items-center justify-between gap-2">
+        <button type="button" id="modal-open-pdf-btn" class="hidden cursor-pointer px-3.5 py-2 rounded-xl bg-latte-50 hover:bg-white border border-latte-300 text-wine-800 text-xs font-bold transition">
+          Abrir Arquivo PDF Original
+        </button>
+        <div class="flex items-center gap-2 ml-auto">
+          <button type="button" id="modal-cancel-btn" class="cursor-pointer px-4 py-2 rounded-xl bg-latte-300 hover:bg-latte-400/60 text-latte-900 text-xs font-bold transition">
+            Cancelar
+          </button>
+          <button type="button" id="modal-save-btn" class="cursor-pointer px-5 py-2 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition shadow-sm">
+            Salvar Alterações
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Flutuante Não-Bloqueante -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm px-4 py-3 rounded-2xl shadow-xl text-xs font-bold border pointer-events-none"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =======================================================================
+      // 1. PERSISTÊNCIA HÍBRIDA BLINDADA (INDEXEDDB + LOCALSTORAGE + MEMÓRIA)
+      //    Totalmente protegida contra SecurityError em iframes / sandboxes.
+      // =======================================================================
+      const META_STORAGE_KEY = 'athenaeum_studio_v5_meta';
+      const LEGACY_KEYS = ['athenaeum_studio_v4_meta', 'athenaeum_studio_v3_meta', 'athenaeum_studio_v2'];
+      const IDB_NAME = 'AthenaeumStudioVaultDB';
+      const IDB_VERSION = 1;
+      const IDB_STATE_STORE = 'app_state';
+      const IDB_TEXT_STORE = 'material_texts';
+      const IDB_BLOB_STORE = 'material_blobs';
+
+      const DEFAULT_SUBJECT_OUTROS = {
+        id: 'subj-outros',
+        name: 'Outros',
+        category: 'Outros'
+      };
+
+      const memoryCache = {
+        meta: null,
+        texts: {},
+        blobs: {},
+        blobUrls: {},
+        latestMatId: null
+      };
+
+      let dbPromise = null;
+      function openVaultDB() {
+        if (dbPromise) return dbPromise;
+        dbPromise = new Promise((resolve) => {
+          try {
+            if (typeof window === 'undefined' || !window.indexedDB) {
+              resolve(null);
+              return;
+            }
+            const req = window.indexedDB.open(IDB_NAME, IDB_VERSION);
+            req.onupgradeneeded = function (event) {
+              const db = event.target.result;
+              if (!db.objectStoreNames.contains(IDB_STATE_STORE)) db.createObjectStore(IDB_STATE_STORE);
+              if (!db.objectStoreNames.contains(IDB_TEXT_STORE)) db.createObjectStore(IDB_TEXT_STORE);
+              if (!db.objectStoreNames.contains(IDB_BLOB_STORE)) db.createObjectStore(IDB_BLOB_STORE);
+            };
+            req.onsuccess = function (event) {
+              resolve(event.target.result);
+            };
+            req.onerror = function () {
+              resolve(null);
+            };
+            req.onblocked = function () {
+              resolve(null);
+            };
+          } catch (e) {
+            resolve(null);
+          }
+        });
+        return dbPromise;
+      }
+
+      async function idbPut(storeName, key, value) {
+        if (storeName === IDB_TEXT_STORE) memoryCache.texts[key] = value;
+        if (storeName === IDB_BLOB_STORE) memoryCache.blobs[key] = value;
+
+        try {
+          const db = await openVaultDB();
+          if (!db) return false;
+          return await new Promise((resolve) => {
+            try {
+              const tx = db.transaction(storeName, 'readwrite');
+              tx.objectStore(storeName).put(value, key);
+              tx.oncomplete = () => resolve(true);
+              tx.onerror = () => resolve(false);
+            } catch (e) {
+              resolve(false);
+            }
+          });
+        } catch (e) {
+          return false;
+        }
+      }
+
+      async function idbGet(storeName, key) {
+        if (storeName === IDB_TEXT_STORE && memoryCache.texts[key] !== undefined) {
+          return memoryCache.texts[key];
+        }
+        if (storeName === IDB_BLOB_STORE && memoryCache.blobs[key] !== undefined) {
+          return memoryCache.blobs[key];
+        }
+        try {
+          const db = await openVaultDB();
+          if (!db) return null;
+          return await new Promise((resolve) => {
+            try {
+              const tx = db.transaction(storeName, 'readonly');
+              const req = tx.objectStore(storeName).get(key);
+              req.onsuccess = () => {
+                const res = req.result !== undefined ? req.result : null;
+                if (storeName === IDB_TEXT_STORE && res) memoryCache.texts[key] = res;
+                if (storeName === IDB_BLOB_STORE && res) memoryCache.blobs[key] = res;
+                resolve(res);
+              };
+              req.onerror = () => resolve(null);
+            } catch (e) {
+              resolve(null);
+            }
+          });
+        } catch (e) {
+          return null;
+        }
+      }
+
+      async function idbDelete(storeName, key) {
+        if (storeName === IDB_TEXT_STORE) delete memoryCache.texts[key];
+        if (storeName === IDB_BLOB_STORE) delete memoryCache.blobs[key];
+        try {
+          const db = await openVaultDB();
+          if (!db) return false;
+          return await new Promise((resolve) => {
+            try {
+              const tx = db.transaction(storeName, 'readwrite');
+              tx.objectStore(storeName).delete(key);
+              tx.oncomplete = () => resolve(true);
+              tx.onerror = () => resolve(false);
+            } catch (e) {
+              resolve(false);
+            }
+          });
+        } catch (e) {
+          return false;
+        }
+      }
+
+      // =======================================================================
+      // 2. ESTADO GLOBAL DA PLATAFORMA
+      // =======================================================================
+      function createFreshState() {
+        return {
+          subjects: [{ ...DEFAULT_SUBJECT_OUTROS }],
+          materials: [],
+          selectedMaterialIds: [],
+          checklistTopics: [],
+          wrongQuestions: [],
+          quizStats: {
+            answered: 0,
+            correct: 0,
+            bySubject: {}
+          },
+          flashcards: [],
+          schedulePlan: null,
+          updatedAt: Date.now()
+        };
+      }
+
+      function normalizeLoadedState(parsed) {
+        if (!parsed || typeof parsed !== 'object') return createFreshState();
+        const loaded = {
+          subjects: Array.isArray(parsed.subjects) && parsed.subjects.length > 0
+            ? parsed.subjects
+            : [{ ...DEFAULT_SUBJECT_OUTROS }],
+          materials: Array.isArray(parsed.materials) ? parsed.materials : [],
+          selectedMaterialIds: Array.isArray(parsed.selectedMaterialIds) ? parsed.selectedMaterialIds : [],
+          checklistTopics: Array.isArray(parsed.checklistTopics) ? parsed.checklistTopics : [],
+          wrongQuestions: Array.isArray(parsed.wrongQuestions) ? parsed.wrongQuestions : [],
+          quizStats: parsed.quizStats && typeof parsed.quizStats === 'object'
+            ? parsed.quizStats
+            : { answered: 0, correct: 0, bySubject: {} },
+          flashcards: Array.isArray(parsed.flashcards) ? parsed.flashcards : [],
+          schedulePlan: parsed.schedulePlan || null,
+          updatedAt: parsed.updatedAt || Date.now()
+        };
+        if (!loaded.subjects.some(s => s.id === 'subj-outros')) {
+          loaded.subjects.unshift({ ...DEFAULT_SUBJECT_OUTROS });
+        }
+        return loaded;
+      }
+
+      function loadSyncMetaState() {
+        try {
+          let raw = window.localStorage.getItem(META_STORAGE_KEY);
+          if (!raw) {
+            for (const legacyKey of LEGACY_KEYS) {
+              const legacyRaw = window.localStorage.getItem(legacyKey);
+              if (legacyRaw) {
+                raw = legacyRaw;
+                break;
+              }
+            }
+          }
+          if (!raw && memoryCache.meta) raw = memoryCache.meta;
+          if (!raw) return createFreshState();
+          return normalizeLoadedState(JSON.parse(raw));
+        } catch (err) {
+          return createFreshState();
+        }
+      }
+
+      let state = loadSyncMetaState();
+      let activeTab = 'acervo';
+      let activeCategoryFilter = 'all';
+      let activePickerSubject = 'all';
+      let quizQuestions = [];
+      let fcIndex = 0;
+      let fcFlipped = false;
+      let editingMaterialId = null;
+
+      let pomoSeconds = 25 * 60;
+      let pomoTimer = null;
+      let pomoRunning = false;
+
+      function buildCompactStateSnapshot() {
+        const validIds = new Set(state.materials.map(m => m.id));
+        state.selectedMaterialIds = state.selectedMaterialIds.filter(id => validIds.has(id));
+        state.updatedAt = Date.now();
+
+        return {
+          subjects: state.subjects,
+          materials: state.materials.map(m => ({
+            id: m.id,
+            subjectId: m.subjectId,
+            type: m.type,
+            title: m.title,
+            reference: m.reference,
+            preview: (m.preview || '').slice(0, 1200),
+            hasBlob: Boolean(m.hasBlob),
+            createdAt: m.createdAt
+          })),
+          selectedMaterialIds: state.selectedMaterialIds,
+          checklistTopics: state.checklistTopics,
+          wrongQuestions: state.wrongQuestions,
+          quizStats: state.quizStats,
+          flashcards: state.flashcards,
+          schedulePlan: state.schedulePlan,
+          updatedAt: state.updatedAt
+        };
+      }
+
+      async function persistState() {
+        const snapshot = buildCompactStateSnapshot();
+        const payload = JSON.stringify(snapshot);
+        memoryCache.meta = payload;
+
+        let lsOk = false;
+        try {
+          window.localStorage.setItem(META_STORAGE_KEY, payload);
+          lsOk = true;
+        } catch (err) {}
+
+        const idbOk = await idbPut(IDB_STATE_STORE, 'primary_state', snapshot);
+        const statusEl = document.getElementById('persistence-status-badge');
+        if (statusEl) {
+          if (idbOk) {
+            statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Salvo automaticamente (IndexedDB)';
+          } else if (lsOk) {
+            statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Salvo no navegador';
+          } else {
+            statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-300 inline-block"></span> Ativo na sessão (Use Backup .JSON)';
+          }
+        }
+
+        updateGlobalIndicators();
+        updateSubjectDatalist();
+        renderAllDirectPickers();
+      }
+
+      async function hydratePersistentVault() {
+        try {
+          if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().catch(() => {});
+          }
+
+          const idbState = await idbGet(IDB_STATE_STORE, 'primary_state');
+          if (idbState && typeof idbState === 'object') {
+            const normalizedIdb = normalizeLoadedState(idbState);
+            const mergedMaterialsMap = new Map();
+            normalizedIdb.materials.forEach(m => mergedMaterialsMap.set(m.id, m));
+            state.materials.forEach(m => {
+              if (!mergedMaterialsMap.has(m.id)) mergedMaterialsMap.set(m.id, m);
+            });
+
+            const mergedSubjectsMap = new Map();
+            normalizedIdb.subjects.forEach(s => mergedSubjectsMap.set(s.id, s));
+            state.subjects.forEach(s => {
+              if (!mergedSubjectsMap.has(s.id)) mergedSubjectsMap.set(s.id, s);
+            });
+
+            if (mergedMaterialsMap.size >= state.materials.length) {
+              state = {
+                ...normalizedIdb,
+                subjects: Array.from(mergedSubjectsMap.values()),
+                materials: Array.from(mergedMaterialsMap.values())
+              };
+            }
+          }
+
+          for (const mat of state.materials) {
+            const fullText = await idbGet(IDB_TEXT_STORE, mat.id);
+            if (fullText) {
+              memoryCache.texts[mat.id] = fullText;
+            } else if (mat.preview) {
+              memoryCache.texts[mat.id] = mat.preview;
+              await idbPut(IDB_TEXT_STORE, mat.id, mat.preview);
+            }
+          }
+
+          updateGlobalIndicators();
+          updateSubjectDatalist();
+          renderAllDirectPickers();
+          if (activeTab === 'acervo') renderVault();
+          if (activeTab === 'planejamento') {
+            renderChecklist();
+            renderSchedule();
+          }
+          if (activeTab === 'raiox') renderRaioX();
+          if (activeTab === 'flashcards') renderFlashcardsStage();
+        } catch (err) {}
+      }
+
+      function getMaterialFullText(mat) {
+        return memoryCache.texts[mat.id] || mat.preview || '';
+      }
+
+      // =======================================================================
+      // 3. BACKUP & RESTAURAÇÃO COMPLETA EM .JSON
+      // =======================================================================
+      async function exportFullBackupJson() {
+        const fullTexts = {};
+        for (const mat of state.materials) {
+          fullTexts[mat.id] = (await idbGet(IDB_TEXT_STORE, mat.id)) || getMaterialFullText(mat);
+        }
+        const backupObj = {
+          app: 'Athenaeum Studio',
+          version: 5,
+          exportedAt: new Date().toISOString(),
+          state: buildCompactStateSnapshot(),
+          texts: fullTexts
+        };
+        const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backup_athenaeum_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        notify('Backup completo (.JSON) exportado com sucesso!');
+      }
+
+      async function importFullBackupJson(file) {
+        if (!file) return;
+        try {
+          const raw = await file.text();
+          const parsed = JSON.parse(raw);
+          if (!parsed || !parsed.state) {
+            notify('Arquivo de backup inválido.', true);
+            return;
+          }
+          state = normalizeLoadedState(parsed.state);
+          const textsMap = parsed.texts || {};
+          for (const mat of state.materials) {
+            const t = textsMap[mat.id] || mat.preview || '';
+            await idbPut(IDB_TEXT_STORE, mat.id, t);
+          }
+          await persistState();
+          renderVault();
+          notify(`Backup restaurado! ${state.materials.length} material(is) recuperado(s).`);
+        } catch (err) {
+          notify('Não foi possível ler o arquivo de backup.', true);
+        }
+      }
+
+      // =======================================================================
+      // 4. EXTRATOR MULTI-FORMATO PURO EM JS (ZERO DEPENDÊNCIAS BLOQUEANTES)
+      //    Suporta PDF (FlateDecode + Pure-JS Inflate + ASCII85 + Hex + UTF-16BE
+      //    + WinAnsi), DOCX/ODT (ZIP), TXT/MD/CSV/JSON/HTML/RTF e Imagens.
+      // =======================================================================
+      const WIN_ANSI_EXTRA = {
+        0x80: 0x20AC, 0x82: 0x201A, 0x83: 0x0192, 0x84: 0x201E, 0x85: 0x2026,
+        0x86: 0x2020, 0x87: 0x2021, 0x88: 0x02C6, 0x89: 0x2030, 0x8A: 0x0160,
+        0x8B: 0x2039, 0x8C: 0x0152, 0x8E: 0x017D, 0x91: 0x2018, 0x92: 0x2019,
+        0x93: 0x201C, 0x94: 0x201D, 0x95: 0x2022, 0x96: 0x2013, 0x97: 0x2014,
+        0x98: 0x02DC, 0x99: 0x2122, 0x9A: 0x0161, 0x9B: 0x203A, 0x9C: 0x0153,
+        0x9E: 0x017E, 0x9F: 0x0178
+      };
+
+      function decodePdfStringBytes(rawStr) {
+        if (rawStr.length >= 2 && rawStr.charCodeAt(0) === 0xFE && rawStr.charCodeAt(1) === 0xFF) {
+          let out = '';
+          for (let i = 2; i + 1 < rawStr.length; i += 2) {
+            const code = (rawStr.charCodeAt(i) << 8) | rawStr.charCodeAt(i + 1);
+            if (code >= 32) out += String.fromCharCode(code);
+          }
+          return out;
+        }
+        let out = '';
+        for (let i = 0; i < rawStr.length; i++) {
+          const b = rawStr.charCodeAt(i) & 0xFF;
+          if (WIN_ANSI_EXTRA[b]) {
+            out += String.fromCharCode(WIN_ANSI_EXTRA[b]);
+          } else if (b >= 32 || b === 10 || b === 13 || b === 9) {
+            out += String.fromCharCode(b);
+          }
+        }
+        return out;
+      }
+
+      function unescapePdfLiteral(str) {
+        const replaced = str
+          .replace(/\\n/g, '\n')
+          .replace(/\\r/g, ' ')
+          .replace(/\\t/g, ' ')
+          .replace(/\\b/g, '')
+          .replace(/\\f/g, ' ')
+          .replace(/\\\(/g, '(')
+          .replace(/\\\)/g, ')')
+          .replace(/\\\\/g, '\\')
+          .replace(/\\([0-7]{1,3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
+        return decodePdfStringBytes(replaced);
+      }
+
+      function decodePdfHexLiteral(hexStr) {
+        const clean = hexStr.replace(/\s+/g, '');
+        if (clean.length < 2) return '';
+        let raw = '';
+        for (let i = 0; i + 1 < clean.length; i += 2) {
+          raw += String.fromCharCode(parseInt(clean.slice(i, i + 2), 16));
+        }
+        return decodePdfStringBytes(raw);
+      }
+
+      function decodeAscii85(input) {
+        const cleaned = input.replace(/^<~|~>$/g, '').replace(/\s+/g, '');
+        if (!cleaned) return '';
+        if (cleaned === 'z') return '\0\0\0\0';
+        const out = [];
+        for (let i = 0; i < cleaned.length; i += 5) {
+          const chunk = cleaned.slice(i, i + 5);
+          if (chunk === 'z') {
+            out.push(0, 0, 0, 0);
+            continue;
+          }
+          let val = 0;
+          const pad = 5 - chunk.length;
+          for (let j = 0; j < 5; j++) {
+            const code = j < chunk.length ? chunk.charCodeAt(j) - 33 : 84;
+            if (code < 0 || code > 84) return '';
+            val = val * 85 + code;
+          }
+          for (let k = 3; k >= pad; k--) {
+            out.push((val >>> (k * 8)) & 0xFF);
+          }
+        }
+        return String.fromCharCode.apply(null, out);
+      }
+
+      // Descompressor Inflate puro em JavaScript (fallback caso DecompressionStream falhe ou não exista)
+      function pureJsInflateRaw(src) {
+        let pos = 0;
+        let bitBuf = 0;
+        let bitCnt = 0;
+        const out = [];
+
+        function readBits(n) {
+          while (bitCnt < n) {
+            if (pos >= src.length) return -1;
+            bitBuf |= src[pos++] << bitCnt;
+            bitCnt += 8;
+          }
+          const val = bitBuf & ((1 << n) - 1);
+          bitBuf >>>= n;
+          bitCnt -= n;
+          return val;
+        }
+
+        function buildHuff(lengths) {
+          const maxBits = Math.max(...lengths, 1);
+          const count = new Int32Array(maxBits + 1);
+          for (let i = 0; i < lengths.length; i++) {
+            if (lengths[i] > 0) count[lengths[i]]++;
+          }
+          const nextCode = new Int32Array(maxBits + 1);
+          let code = 0;
+          for (let bits = 1; bits <= maxBits; bits++) {
+            code = (code + count[bits - 1]) << 1;
+            nextCode[bits] = code;
+          }
+          const table = new Map();
+          for (let sym = 0; sym < lengths.length; sym++) {
+            const len = lengths[sym];
+            if (len > 0) {
+              table.set((len << 16) | nextCode[len]++, sym);
+            }
+          }
+          return { table, maxBits };
+        }
+
+        function decodeSym(huff) {
+          let code = 0;
+          for (let len = 1; len <= huff.maxBits; len++) {
+            const b = readBits(1);
+            if (b < 0) return -1;
+            code = (code << 1) | b;
+            const sym = huff.table.get((len << 16) | code);
+            if (sym !== undefined) return sym;
+          }
+          return -1;
+        }
+
+        const LEN_BASE = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
+        const LEN_EXTRA = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
+        const DIST_BASE = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
+        const DIST_EXTRA = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13];
+        const CL_ORDER = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
+
+        let bfinal = 0;
+        while (!bfinal) {
+          bfinal = readBits(1);
+          const btype = readBits(2);
+          if (bfinal < 0 || btype < 0) break;
+
+          if (btype === 0) {
+            bitBuf = 0;
+            bitCnt = 0;
+            if (pos + 4 > src.length) break;
+            const len = src[pos] | (src[pos + 1] << 8);
+            pos += 4;
+            for (let i = 0; i < len && pos < src.length; i++) out.push(src[pos++]);
+          } else if (btype === 1 || btype === 2) {
+            let litHuff, distHuff;
+            if (btype === 1) {
+              const litLens = new Array(288);
+              for (let i = 0; i <= 143; i++) litLens[i] = 8;
+              for (let i = 144; i <= 255; i++) litLens[i] = 9;
+              for (let i = 256; i <= 279; i++) litLens[i] = 7;
+              for (let i = 280; i <= 287; i++) litLens[i] = 8;
+              litHuff = buildHuff(litLens);
+              distHuff = buildHuff(new Array(32).fill(5));
+            } else {
+              const hlit = readBits(5) + 257;
+              const hdist = readBits(5) + 1;
+              const hclen = readBits(4) + 4;
+              const clLens = new Array(19).fill(0);
+              for (let i = 0; i < hclen; i++) clLens[CL_ORDER[i]] = readBits(3);
+              const clHuff = buildHuff(clLens);
+              const allLens = [];
+              while (allLens.length < hlit + hdist) {
+                const sym = decodeSym(clHuff);
+                if (sym < 0) break;
+                if (sym < 16) {
+                  allLens.push(sym);
+                } else if (sym === 16) {
+                  const rep = readBits(2) + 3;
+                  const prev = allLens[allLens.length - 1] || 0;
+                  for (let r = 0; r < rep; r++) allLens.push(prev);
+                } else if (sym === 17) {
+                  const rep = readBits(3) + 3;
+                  for (let r = 0; r < rep; r++) allLens.push(0);
+                } else if (sym === 18) {
+                  const rep = readBits(7) + 11;
+                  for (let r = 0; r < rep; r++) allLens.push(0);
+                }
+              }
+              litHuff = buildHuff(allLens.slice(0, hlit));
+              distHuff = buildHuff(allLens.slice(hlit, hlit + hdist));
+            }
+
+            while (true) {
+              const sym = decodeSym(litHuff);
+              if (sym < 0 || sym === 256) break;
+              if (sym < 256) {
+                out.push(sym);
+              } else {
+                const lIdx = sym - 257;
+                if (lIdx >= LEN_BASE.length) break;
+                const length = LEN_BASE[lIdx] + readBits(LEN_EXTRA[lIdx]);
+                const dSym = decodeSym(distHuff);
+                if (dSym < 0 || dSym >= DIST_BASE.length) break;
+                const dist = DIST_BASE[dSym] + readBits(DIST_EXTRA[dSym]);
+                for (let k = 0; k < length; k++) {
+                  out.push(out[out.length - dist] || 0);
+                }
+              }
+            }
+          } else {
+            break;
+          }
+        }
+        return new Uint8Array(out);
+      }
+
+      async function inflateStreamBytes(uint8Slice) {
+        if (typeof DecompressionStream !== 'undefined') {
+          for (const fmt of ['deflate', 'deflate-raw']) {
+            try {
+              const ds = new DecompressionStream(fmt);
+              const writer = ds.writable.getWriter();
+              writer.write(uint8Slice);
+              writer.close();
+              const buf = await new Response(ds.readable).arrayBuffer();
+              if (buf && buf.byteLength > 0) {
+                return new Uint8Array(buf);
+              }
+            } catch (e) {}
+          }
+        }
+        // Fallback puro em JS (tenta zlib header de 2 bytes e depois raw)
+        try {
+          if (uint8Slice.length > 6 && (uint8Slice[0] & 0x0F) === 8) {
+            const resZlib = pureJsInflateRaw(uint8Slice.subarray(2));
+            if (resZlib && resZlib.length > 0) return resZlib;
+          }
+          const resRaw = pureJsInflateRaw(uint8Slice);
+          if (resRaw && resRaw.length > 0) return resRaw;
+        } catch (e) {}
+        return null;
+      }
+
+      function parseTextOperatorsFromPdfStream(streamText, collectedParagraphs) {
+        const btEtRegex = /BT[\s\S]{1,60000}?ET/g;
+        let match;
+        while ((match = btEtRegex.exec(streamText)) !== null) {
+          const block = match[0];
+          const tokenRegex = /\(([^()\\]*(?:\\.[^()\\]*)*)\)\s*(?:Tj|'|")|<([0-9A-Fa-f\s]+)>\s*Tj|<~([!-u\s]+)~>\s*Tj|\[([\s\S]*?)\]\s*TJ/g;
+          let tok;
+          let lineBuffer = '';
+          while ((tok = tokenRegex.exec(block)) !== null) {
+            if (tok[1] !== undefined) {
+              lineBuffer += unescapePdfLiteral(tok[1]);
+            } else if (tok[2] !== undefined) {
+              lineBuffer += decodePdfHexLiteral(tok[2]);
+            } else if (tok[3] !== undefined) {
+              lineBuffer += decodePdfStringBytes(decodeAscii85(tok[3]));
+            } else if (tok[4] !== undefined) {
+              const arrInner = tok[4];
+              const subRegex = /\(([^()\\]*(?:\\.[^()\\]*)*)\)|<([0-9A-Fa-f\s]+)>|<~([!-u\s]+)~>|(-?\d+(?:\.\d+)?)/g;
+              let sub;
+              while ((sub = subRegex.exec(arrInner)) !== null) {
+                if (sub[1] !== undefined) {
+                  lineBuffer += unescapePdfLiteral(sub[1]);
+                } else if (sub[2] !== undefined) {
+                  lineBuffer += decodePdfHexLiteral(sub[2]);
+                } else if (sub[3] !== undefined) {
+                  lineBuffer += decodePdfStringBytes(decodeAscii85(sub[3]));
+                } else if (sub[4] !== undefined) {
+                  const kern = parseFloat(sub[4]);
+                  if (kern < -110) lineBuffer += ' ';
+                }
+              }
+            }
+          }
+          const cleaned = lineBuffer.replace(/\s+/g, ' ').trim();
+          if (cleaned.length >= 2 && /[a-zA-ZÀ-ÿ0-9]/.test(cleaned)) {
+            collectedParagraphs.push(cleaned);
+          }
+        }
+      }
+
+      async function extractTextFromPdfBuffer(arrayBuffer) {
+        const bytes = new Uint8Array(arrayBuffer);
+        const latinDecoder = new TextDecoder('latin1');
+        const rawPdf = latinDecoder.decode(bytes);
+        const paragraphs = [];
+
+        parseTextOperatorsFromPdfStream(rawPdf, paragraphs);
+
+        let searchPos = 0;
+        let streamCount = 0;
+        while (searchPos < rawPdf.length && streamCount < 300) {
+          const sIdx = rawPdf.indexOf('stream', searchPos);
+          if (sIdx === -1) break;
+          let dataStart = sIdx + 6;
+          if (rawPdf[dataStart] === '\r' && rawPdf[dataStart + 1] === '\n') dataStart += 2;
+          else if (rawPdf[dataStart] === '\n' || rawPdf[dataStart] === '\r') dataStart += 1;
+
+          const eIdx = rawPdf.indexOf('endstream', dataStart);
+          if (eIdx === -1) break;
+
+          let dataEnd = eIdx;
+          if (rawPdf[dataEnd - 1] === '\n') dataEnd--;
+          if (rawPdf[dataEnd - 1] === '\r') dataEnd--;
+
+          if (dataEnd > dataStart && dataEnd - dataStart < 10_000_000) {
+            const slice = bytes.slice(dataStart, dataEnd);
+            const inflated = await inflateStreamBytes(slice);
+            if (inflated) {
+              const inflatedStr = latinDecoder.decode(inflated);
+              parseTextOperatorsFromPdfStream(inflatedStr, paragraphs);
+            }
+          }
+          searchPos = eIdx + 9;
+          streamCount++;
+        }
+
+        return paragraphs.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+      }
+
+      function extractTextFromRtf(rawRtf) {
+        return rawRtf
+          .replace(/\\par[d]?/g, '\n')
+          .replace(/\\line/g, '\n')
+          .replace(/\\tab/g, ' ')
+          .replace(/\\'([0-9a-fA-F]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+          .replace(/\\u(-?\d+)\??/g, (_, code) => {
+            const n = parseInt(code, 10);
+            return n >= 0 ? String.fromCharCode(n) : '';
+          })
+          .replace(/\{[^{}]*\}/g, ' ')
+          .replace(/\\[a-zA-Z]+-?\d*\s?/g, ' ')
+          .replace(/[{}]/g, '')
+          .replace(/[ \t]+/g, ' ')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+      }
+
+      function extractTextFromHtmlMarkup(rawHtml) {
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(rawHtml, 'text/html');
+          doc.querySelectorAll('script, style, noscript').forEach(el => el.remove());
+          return (doc.body && doc.body.innerText ? doc.body.innerText : doc.body.textContent || '')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+        } catch (e) {
+          return rawHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+      }
+
+      async function extractTextFromZipDocument(arrayBuffer) {
+        const bytes = new Uint8Array(arrayBuffer);
+        const view = new DataView(arrayBuffer);
+        const decoder = new TextDecoder('utf-8', { fatal: false });
+        let offset = 0;
+
+        while (offset + 30 < bytes.length) {
+          const sig = view.getUint32(offset, true);
+          if (sig !== 0x04034b50) break;
+          const method = view.getUint16(offset + 8, true);
+          const compSize = view.getUint32(offset + 18, true);
+          const nameLen = view.getUint16(offset + 26, true);
+          const extraLen = view.getUint16(offset + 28, true);
+          const nameStart = offset + 30;
+          const fileName = decoder.decode(bytes.slice(nameStart, nameStart + nameLen));
+          const dataStart = nameStart + nameLen + extraLen;
+          const dataEnd = dataStart + compSize;
+          if (dataEnd > bytes.length) break;
+
+          if (fileName === 'word/document.xml' || fileName === 'content.xml') {
+            const rawEntry = bytes.slice(dataStart, dataEnd);
+            let xmlText = '';
+            if (method === 0) {
+              xmlText = decoder.decode(rawEntry);
+            } else if (method === 8) {
+              const inflated = await inflateStreamBytes(rawEntry);
+              if (inflated) xmlText = decoder.decode(inflated);
+            }
+            if (xmlText) {
+              return xmlText
+                .replace(/<\/w:p>/g, '\n')
+                .replace(/<\/text:p>/g, '\n')
+                .replace(/<\/w:tr>/g, '\n')
+                .replace(/<w:tab\/>/g, ' ')
+                .replace(/<[^>]+>/g, '')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&apos;/g, "'")
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+            }
+          }
+          offset = dataEnd;
+        }
+        return '';
+      }
+
+      async function readSmartTextBuffer(file) {
+        const buf = await file.arrayBuffer();
+        const utf8 = new TextDecoder('utf-8', { fatal: false }).decode(buf);
+        if (utf8.includes('\uFFFD')) {
+          return new TextDecoder('windows-1252').decode(buf);
+        }
+        return utf8;
+      }
+
+      function countWordsInText(text) {
+        if (!text) return 0;
+        const matches = String(text).trim().match(/[\p{L}\p{N}_-]+/gu);
+        return matches ? matches.length : 0;
+      }
+
+      function formatMaterialExtractedSummary(mat) {
+        const fullText = getMaterialFullText(mat).trim();
+        if (!fullText) {
+          return {
+            excerpt: 'Nenhum texto extraído ainda. Clique em "Ler / Editar Conteúdo Completo" para adicionar ou revisar.',
+            words: 0,
+            chars: 0
+          };
+        }
+        const words = countWordsInText(fullText);
+        const chars = fullText.length;
+        const normalized = fullText.replace(/\s+/g, ' ').trim();
+        const excerpt = normalized.length > 280
+          ? normalized.slice(0, 280).trim() + '...'
+          : normalized;
+        return { excerpt, words, chars };
+      }
+
+      // =======================================================================
+      // 5. UTILITÁRIOS DE UI & ESCAPE HTML
+      // =======================================================================
+      function esc(val) {
+        if (val === null || val === undefined) return '';
+        return String(val)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      let toastTimer = null;
+      function notify(msg, isError = false) {
+        const el = document.getElementById('toast');
+        if (!el) return;
+        el.textContent = msg;
+        el.className = 'fixed bottom-5 right-5 z-50 max-w-sm px-4 py-3 rounded-2xl shadow-xl text-xs font-bold border pointer-events-none ' +
+          (isError ? 'bg-rose-900 text-rose-50 border-rose-700' : 'bg-wine-800 text-latte-50 border-wine-600');
+        el.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.add('hidden'), 3800);
+      }
+
+      function getSelectedMaterials() {
+        return state.materials.filter(m => state.selectedMaterialIds.includes(m.id));
+      }
+
+      function updateGlobalIndicators() {
+        const selected = getSelectedMaterials();
+        const sideCount = document.getElementById('sidebar-selected-count');
+        const sideNames = document.getElementById('sidebar-selected-names');
+        const headCount = document.getElementById('header-selected-count');
+        const wrongBadge = document.getElementById('nav-wrong-badge');
+        const quickPills = document.getElementById('global-quick-pills');
+        const usageLabel = document.getElementById('storage-usage-label');
+
+        if (sideCount) sideCount.textContent = `${selected.length} ${selected.length === 1 ? 'item' : 'itens'}`;
+        if (headCount) headCount.textContent = String(selected.length);
+
+        if (usageLabel) {
+          let totalChars = 0;
+          state.materials.forEach(m => { totalChars += getMaterialFullText(m).length; });
+          const kb = Math.max(1, Math.round(totalChars / 1024));
+          usageLabel.textContent = `${state.materials.length} arq. (~${kb} KB)`;
+        }
+
+        if (sideNames) {
+          if (state.materials.length === 0) {
+            sideNames.textContent = 'Envie seus materiais na Aba 1. Eles ficam salvos automaticamente ao atualizar a página.';
+          } else if (selected.length === 0) {
+            sideNames.textContent = 'Clique nos materiais já enviados para ativá-los.';
+          } else {
+            sideNames.textContent = selected.map(m => m.title).join(', ');
+          }
+        }
+
+        if (wrongBadge) {
+          if (state.wrongQuestions.length > 0) {
+            wrongBadge.textContent = String(state.wrongQuestions.length);
+            wrongBadge.classList.remove('hidden');
+          } else {
+            wrongBadge.classList.add('hidden');
+          }
+        }
+
+        if (quickPills) {
+          if (state.materials.length === 0) {
+            quickPills.innerHTML = '<span class="text-latte-500 italic">Nenhum material enviado ainda.</span>';
+          } else {
+            quickPills.innerHTML = state.materials.map(m => {
+              const active = state.selectedMaterialIds.includes(m.id);
+              return `<button type="button" data-toggle-material="${m.id}" class="cursor-pointer px-2.5 py-1 rounded-full font-bold whitespace-nowrap transition border ${
+                active
+                  ? 'bg-wine-700 text-white border-wine-700'
+                  : 'bg-latte-100 text-latte-800 border-latte-300 hover:border-wine-500'
+              }">${active ? '✓ ' : ''}${esc(m.title)}</button>`;
+            }).join('');
+          }
+        }
+      }
+
+      function updateSubjectDatalist() {
+        const dl = document.getElementById('datalist-subjects');
+        if (!dl) return;
+        dl.innerHTML = state.subjects.map(s => `<option value="${esc(s.name)}"></option>`).join('');
+      }
+
+      function switchTab(tab) {
+        try {
+          activeTab = tab;
+          const allTabs = ['acervo', 'questoes', 'raiox', 'flashcards', 'planejamento', 'resumo'];
+          allTabs.forEach(t => {
+            const panel = document.getElementById('tab-' + t);
+            if (panel) panel.classList.toggle('hidden', t !== tab);
+          });
+
+          document.querySelectorAll('.nav-btn').forEach(btn => {
+            const isMatch = btn.getAttribute('data-nav') === tab;
+            btn.className = isMatch
+              ? 'nav-btn cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-sm font-semibold transition bg-latte-100 text-wine-800 shadow-sm'
+              : 'nav-btn cursor-pointer w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-sm font-semibold transition text-latte-100 hover:bg-wine-800';
+          });
+
+          const headerMeta = {
+            acervo: ['Matérias & Acervo de Estudos', 'Envie seus PDFs, documentos, textos ou imagens uma única vez aqui. O texto escrito é extraído na hora e fica salvo ao atualizar a página.'],
+            questoes: ['Questões Variadas (50+) & 15 Comentadas', 'Cada questão é criada a partir do texto enviado, em 8 formatos variados. O gabarito só aparece ao clicar em uma alternativa.'],
+            raiox: ['Raio-X dos Erros & Plano de Revisão', 'Diagnóstico automático por matéria com plano focado primeiro nos seus pontos mais fracos.'],
+            flashcards: ['Flashcards Ativos & Exportação Anki', 'Clique nos materiais já enviados para gerar cards Frente;Verso prontos para importar no Anki.'],
+            planejamento: ['Cronograma (7/15/30 dias) & Checklist', 'Gerencie tópicos com sub-matérias marcáveis e distribua seu estudo até a data alvo com revisões espaçadas.'],
+            resumo: ['Resumo Flash — Pontos Importantes & Pegadinhas', 'Síntese objetiva em até 10 páginas baseada exclusivamente nos materiais selecionados.']
+          };
+
+          const titleEl = document.getElementById('header-title');
+          const subEl = document.getElementById('header-subtitle');
+          if (titleEl && headerMeta[tab]) titleEl.textContent = headerMeta[tab][0];
+          if (subEl && headerMeta[tab]) subEl.textContent = headerMeta[tab][1];
+
+          if (tab === 'acervo') renderVault();
+          if (tab === 'questoes') {
+            renderAllDirectPickers();
+            if (quizQuestions.length === 0 && getSelectedMaterials().length > 0) generateQuiz(true);
+            else renderQuizList();
+          }
+          if (tab === 'raiox') renderRaioX();
+          if (tab === 'flashcards') {
+            renderAllDirectPickers();
+            if (state.flashcards.length === 0 && getSelectedMaterials().length > 0) generateFlashcards(true);
+            else renderFlashcardsStage();
+          }
+          if (tab === 'planejamento') {
+            renderChecklist();
+            initScheduleDefaultDate();
+            renderSchedule();
+          }
+          if (tab === 'resumo') {
+            renderAllDirectPickers();
+            generateResumoFlash(true);
+          }
+        } catch (err) {
+          console.error('Erro ao alternar aba:', err);
+        }
+      }
+      window.switchTab = switchTab;
+
+      async function toggleMaterial(matId) {
+        const idx = state.selectedMaterialIds.indexOf(matId);
+        if (idx === -1) state.selectedMaterialIds.push(matId);
+        else state.selectedMaterialIds.splice(idx, 1);
+        await persistState();
+
+        if (activeTab === 'acervo') renderVault();
+        if (activeTab === 'questoes') {
+          if (getSelectedMaterials().length > 0) generateQuiz(true);
+          else {
+            quizQuestions = [];
+            renderQuizList();
+          }
+        }
+        if (activeTab === 'flashcards') {
+          if (getSelectedMaterials().length > 0) generateFlashcards(true);
+          else renderFlashcardsStage();
+        }
+        if (activeTab === 'resumo') generateResumoFlash(true);
+      }
+
+      async function bulkSelectMaterials(selectAll) {
+        state.selectedMaterialIds = selectAll ? state.materials.map(m => m.id) : [];
+        await persistState();
+        if (activeTab === 'acervo') renderVault();
+        if (activeTab === 'questoes' && selectAll && state.materials.length > 0) generateQuiz(true);
+        if (activeTab === 'flashcards' && selectAll && state.materials.length > 0) generateFlashcards(true);
+        if (activeTab === 'resumo') generateResumoFlash(true);
+      }
+
+      // =======================================================================
+      // 6. SELETOR DIRETO DE MATERIAIS NAS OUTRAS ABAS (SEM RE-UPLOAD)
+      // =======================================================================
+      function renderDirectPicker(containerId, context) {
+        const box = document.getElementById(containerId);
+        if (!box) return;
+
+        if (state.materials.length === 0) {
+          box.innerHTML = `
+            <div class="rounded-2xl border-2 border-dashed border-latte-300 bg-latte-100 p-5 text-center space-y-2">
+              <p class="font-editorial font-bold text-sm text-latte-900">Nenhum material no acervo ainda</p>
+              <p class="text-xs text-latte-600">Envie seus PDFs, documentos, imagens ou textos uma única vez na aba <strong>1. Matérias & Acervo</strong>. Eles aparecerão aqui automaticamente.</p>
+              <button type="button" data-nav="acervo" class="cursor-pointer mt-1 px-4 py-2 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition">
+                ← Ir para Matérias & Acervo
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        const filterSubj = state.subjects.some(s => s.id === activePickerSubject) ? activePickerSubject : 'all';
+        const visibleMaterials = filterSubj === 'all'
+          ? state.materials
+          : state.materials.filter(m => m.subjectId === filterSubj);
+
+        const subjectPills = [
+          `<button type="button" data-picker-subject="all" class="cursor-pointer px-3 py-1 rounded-full text-xs font-bold transition ${filterSubj === 'all' ? 'bg-wine-700 text-white' : 'bg-latte-200 text-latte-800 hover:bg-latte-300'}">Todas (${state.materials.length})</button>`,
+          ...state.subjects.map(s => {
+            const cnt = state.materials.filter(m => m.subjectId === s.id).length;
+            return `<button type="button" data-picker-subject="${s.id}" class="cursor-pointer px-3 py-1 rounded-full text-xs font-bold transition ${filterSubj === s.id ? 'bg-wine-700 text-white' : 'bg-latte-200 text-latte-800 hover:bg-latte-300'}">${esc(s.name)} (${cnt})</button>`;
+          })
+        ].join('');
+
+        box.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-bold text-wine-800">Clique nos materiais já enviados para selecionar (${state.selectedMaterialIds.length} ativo${state.selectedMaterialIds.length === 1 ? '' : 's'}):</span>
+              <div class="flex items-center gap-3 text-xs">
+                <button type="button" data-bulk-select="true" class="cursor-pointer font-bold text-wine-700 hover:underline">Selecionar todos</button>
+                <button type="button" data-bulk-select="false" class="cursor-pointer font-semibold text-latte-600 hover:underline">Limpar seleção</button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5">${subjectPills}</div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              ${visibleMaterials.map(mat => {
+                const isSel = state.selectedMaterialIds.includes(mat.id);
+                const subj = state.subjects.find(s => s.id === mat.subjectId);
+                return `
+                  <button type="button" data-toggle-material="${mat.id}" data-context="${context}" class="cursor-pointer text-left p-3 rounded-xl border-2 transition flex items-start gap-2.5 ${
+                    isSel ? 'bg-wine-50 border-wine-700 shadow-xs' : 'bg-latte-100 border-latte-300 hover:border-wine-400'
+                  }">
+                    <span class="w-5 h-5 rounded-md flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5 ${
+                      isSel ? 'bg-wine-700 text-white' : 'bg-latte-200 text-latte-600'
+                    }">${isSel ? '✓' : '+'}</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
+                        <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-latte-200 text-wine-800">${esc(mat.type)}</span>
+                        <span class="text-[10px] font-semibold text-latte-600 truncate">${esc(subj ? subj.name : 'Outros')}</span>
+                      </div>
+                      <p class="text-xs font-bold text-latte-900 truncate">${esc(mat.title)}</p>
+                      <p class="text-[11px] text-latte-600 truncate">${esc(mat.reference || 'Material enviado')}</p>
+                    </div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderAllDirectPickers() {
+        renderDirectPicker('picker-questoes', 'questoes');
+        renderDirectPicker('picker-flashcards', 'flashcards');
+        renderDirectPicker('picker-resumo', 'resumo');
+      }
+
+      // =======================================================================
+      // 7. UPLOAD, LEITURA IMEDIATA E GESTÃO DO ACERVO (ABA 1)
+      // =======================================================================
+      function resolveSubjectIdFromInputs() {
+        const nameInput = document.getElementById('input-subject-name');
+        const catSelect = document.getElementById('select-subject-category');
+        const rawName = (nameInput ? nameInput.value : '').trim();
+        const category = catSelect ? catSelect.value : 'Outros';
+
+        if (!rawName || rawName.toLowerCase() === 'outros') {
+          return 'subj-outros';
+        }
+
+        const existing = state.subjects.find(s => s.name.toLowerCase() === rawName.toLowerCase());
+        if (existing) return existing.id;
+
+        const newSubj = {
+          id: 'subj-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          name: rawName,
+          category
+        };
+        state.subjects.push(newSubj);
+        return newSubj.id;
+      }
+
+      function compressImageToDataUrl(file) {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = function (ev) {
+            const img = new Image();
+            img.onload = function () {
+              try {
+                const canvas = document.createElement('canvas');
+                const maxSide = 920;
+                let w = img.width;
+                let h = img.height;
+                if (w > maxSide || h > maxSide) {
+                  if (w > h) {
+                    h = Math.round((h * maxSide) / w);
+                    w = maxSide;
+                  } else {
+                    w = Math.round((w * maxSide) / h);
+                    h = maxSide;
+                  }
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', 0.76));
+              } catch (e) {
+                resolve(ev.target.result);
+              }
+            };
+            img.onerror = () => resolve(null);
+            img.src = ev.target.result;
+          };
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function showLatestExtractedPanel(mat, fullText) {
+        const banner = document.getElementById('latest-extracted-banner');
+        const titleEl = document.getElementById('latest-extracted-title');
+        const statsEl = document.getElementById('latest-extracted-stats');
+        const contentEl = document.getElementById('latest-extracted-content');
+        if (!banner || !titleEl || !statsEl || !contentEl) return;
+
+        memoryCache.latestMatId = mat.id;
+        const words = countWordsInText(fullText);
+        titleEl.textContent = mat.title;
+        statsEl.textContent = `(${words} palavras • ${fullText.length} caracteres)`;
+        contentEl.textContent = fullText;
+        banner.classList.remove('hidden');
+      }
+
+      function updateUploadDiagnostic(message, badgeText = 'Status', tone = 'neutral') {
+        const bar = document.getElementById('upload-status-bar');
+        const textEl = document.getElementById('upload-diagnostic-text');
+        const badgeEl = document.getElementById('upload-diagnostic-badge');
+        if (!bar || !textEl || !badgeEl) return;
+
+        bar.classList.remove('hidden');
+        textEl.textContent = message;
+        badgeEl.textContent = badgeText;
+
+        if (tone === 'working') {
+          bar.className = 'p-3.5 rounded-xl bg-wine-100 border border-wine-300 text-xs font-bold text-wine-900 flex items-center justify-between gap-2';
+          badgeEl.className = 'px-2 py-0.5 rounded-full bg-wine-700 text-white text-[10px] font-bold shrink-0';
+        } else if (tone === 'success') {
+          bar.className = 'p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-xs font-bold text-emerald-900 flex items-center justify-between gap-2';
+          badgeEl.className = 'px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shrink-0';
+        } else if (tone === 'error') {
+          bar.className = 'p-3.5 rounded-xl bg-rose-50 border border-rose-300 text-xs font-bold text-rose-900 flex items-center justify-between gap-2';
+          badgeEl.className = 'px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold shrink-0';
+        } else {
+          bar.className = 'p-3.5 rounded-xl bg-latte-200/80 border border-latte-300 text-xs font-semibold text-latte-800 flex items-center justify-between gap-2';
+          badgeEl.className = 'px-2 py-0.5 rounded-full bg-latte-50 border border-latte-300 text-[10px] font-bold text-wine-800 shrink-0';
+        }
+      }
+
+      async function openModernFilePicker() {
+        if (typeof window.showOpenFilePicker !== 'function') {
+          updateUploadDiagnostic(
+            'A API Moderna não está disponível neste navegador/visualizador. Use o botão "Escolher arquivo" logo acima ou "Colar da Área de Transferência".',
+            'Use Seletor Padrão',
+            'error'
+          );
+          const nativeInput = document.getElementById('fileInput');
+          if (nativeInput) nativeInput.focus();
+          return;
+        }
+
+        try {
+          updateUploadDiagnostic('Abrindo janela nativa de arquivos...', 'Abrindo', 'working');
+          const handles = await window.showOpenFilePicker({ multiple: true });
+          const files = [];
+          for (const handle of handles) {
+            const file = await handle.getFile();
+            files.push(file);
+          }
+          if (files.length > 0) {
+            await processUploadedFiles(files);
+          }
+        } catch (err) {
+          if (err && err.name === 'AbortError') {
+            updateUploadDiagnostic('Seleção de arquivo cancelada pelo usuário.', 'Cancelado', 'neutral');
+          } else {
+            updateUploadDiagnostic(
+              `Bloqueio do visualizador (${err && err.message ? err.message : 'Sandbox'}). Use o seletor padrão acima ou o botão "4. Digitar / Colar Texto Direto".`,
+              'Restrito',
+              'error'
+            );
+          }
+        }
+      }
+
+      async function importFromClipboard() {
+        try {
+          if (!navigator.clipboard || typeof navigator.clipboard.readText !== 'function') {
+            throw new Error('Permissão de leitura automática bloqueada pelo navegador.');
+          }
+          updateUploadDiagnostic('Lendo conteúdo da área de transferência...', 'Lendo', 'working');
+          const clipText = await navigator.clipboard.readText();
+          if (!clipText || !clipText.trim()) {
+            updateUploadDiagnostic('A área de transferência está vazia. Copie um texto primeiro e tente novamente.', 'Vazio', 'error');
+            return;
+          }
+
+          const cleanClip = clipText.trim();
+          const subjectId = resolveSubjectIdFromInputs();
+          const matId = 'mat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+          const firstLine = cleanClip.split('\n')[0].trim().slice(0, 52) || 'Material Colado';
+
+          await idbPut(IDB_TEXT_STORE, matId, cleanClip);
+          const matObj = {
+            id: matId,
+            subjectId,
+            type: 'Texto',
+            title: firstLine,
+            reference: 'Colado da Área de Transferência',
+            preview: cleanClip.slice(0, 1200),
+            hasBlob: false,
+            createdAt: new Date().toLocaleDateString('pt-BR')
+          };
+          state.materials.unshift(matObj);
+          state.selectedMaterialIds.push(matId);
+          await persistState();
+          renderVault();
+          showLatestExtractedPanel(matObj, cleanClip);
+          updateUploadDiagnostic(
+            `Texto colado com sucesso: "${firstLine}" (${countWordsInText(cleanClip)} palavras salvas).`,
+            'Concluído',
+            'success'
+          );
+          notify('Texto importado da área de transferência!');
+        } catch (err) {
+          updateUploadDiagnostic(
+            'O navegador bloqueou a leitura automática da área de transferência. Abrindo campo manual para você colar com Ctrl+V / Toque.',
+            'Abrir Campo Manual',
+            'error'
+          );
+          switchToManualMode();
+        }
+      }
+
+      function switchToManualMode() {
+        const fileBox = document.getElementById('box-upload-file');
+        const manualBox = document.getElementById('box-upload-manual');
+        const fileBtn = document.getElementById('mode-file-btn');
+        const manualBtn = document.getElementById('mode-manual-btn');
+        if (fileBox) fileBox.classList.add('hidden');
+        if (manualBox) manualBox.classList.remove('hidden');
+        if (manualBtn) manualBtn.className = 'cursor-pointer px-3.5 py-1.5 rounded-lg bg-wine-700 text-white transition';
+        if (fileBtn) fileBtn.className = 'cursor-pointer px-3.5 py-1.5 rounded-lg text-latte-800 hover:text-wine-800 transition';
+        const bodyEl = document.getElementById('manual-body');
+        if (bodyEl) bodyEl.focus();
+      }
+
+      async function processUploadedFiles(fileList) {
+        const files = Array.from(fileList || []);
+        if (files.length === 0) {
+          updateUploadDiagnostic('Nenhum arquivo recebido pelo seletor. Tente novamente ou use o modo de texto direto.', 'Sem Arquivo', 'error');
+          return;
+        }
+
+        const totalBytes = files.reduce((acc, f) => acc + (f.size || 0), 0);
+        const totalKb = Math.max(1, Math.round(totalBytes / 1024));
+        updateUploadDiagnostic(
+          `Arquivo(s) recebido(s): ${files.map(f => f.name).join(', ')} (${totalKb} KB). Extraindo conteúdo escrito...`,
+          'Extraindo...',
+          'working'
+        );
+
+        const subjectId = resolveSubjectIdFromInputs();
+        let added = 0;
+        let lastAddedMat = null;
+        let lastAddedText = '';
+
+        for (const file of files) {
+          try {
+            const name = file.name || 'Arquivo';
+            const lower = name.toLowerCase();
+            const mime = (file.type || '').toLowerCase();
+            const isPdf = mime.includes('pdf') || lower.endsWith('.pdf');
+            const isImg = mime.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/i.test(lower);
+            const isZipDoc = mime.includes('wordprocessingml') || mime.includes('opendocument.text') || /\.(docx|odt)$/i.test(lower);
+            const isRtf = mime.includes('rtf') || lower.endsWith('.rtf');
+            const isHtml = mime.includes('html') || /\.(html|htm)$/i.test(lower);
+            const isTxt =
+              mime.startsWith('text/') ||
+              mime.includes('json') ||
+              mime.includes('csv') ||
+              /\.(txt|md|csv|json|log|tex|py|js|css|xml|yaml|yml)$/i.test(lower);
+
+            const matId = 'mat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+            const cleanTitle = name.replace(/\.[^/.]+$/, '');
+            const createdAt = new Date().toLocaleDateString('pt-BR');
+
+            updateUploadDiagnostic(
+              `Processando "${name}" (${Math.max(1, Math.round((file.size || 0) / 1024))} KB)...`,
+              'Lendo arquivo',
+              'working'
+            );
+
+            if (isPdf) {
+              await idbPut(IDB_BLOB_STORE, matId, file);
+              try {
+                memoryCache.blobUrls[matId] = URL.createObjectURL(file);
+              } catch (e) {}
+
+              let extracted = '';
+              try {
+                const buffer = await file.arrayBuffer();
+                extracted = await extractTextFromPdfBuffer(buffer);
+              } catch (e) {
+                updateUploadDiagnostic(`Aviso ao ler fluxo interno do PDF "${name}": ${e.message || 'erro de leitura'}. Salvando registro...`, 'Aviso', 'error');
+              }
+
+              const finalText = extracted && extracted.trim().length > 0
+                ? extracted.trim()
+                : `PDF "${name}" anexado (${Math.max(1, Math.round(file.size / 1024))} KB). Este PDF parece ser uma imagem escaneada sem texto selecionável — clique em "Editar / Completar Texto" para colar ou digitar o conteúdo dele.`;
+
+              await idbPut(IDB_TEXT_STORE, matId, finalText);
+
+              const matObj = {
+                id: matId,
+                subjectId,
+                type: 'PDF',
+                title: cleanTitle,
+                reference: name,
+                preview: finalText.slice(0, 1200),
+                hasBlob: true,
+                createdAt
+              };
+              state.materials.unshift(matObj);
+              state.selectedMaterialIds.push(matId);
+              lastAddedMat = matObj;
+              lastAddedText = finalText;
+              added++;
+            } else if (isImg) {
+              const dataUrl = await compressImageToDataUrl(file);
+              if (dataUrl) {
+                await idbPut(IDB_BLOB_STORE, matId, dataUrl);
+              }
+              const imgNotes = `Imagem de estudo "${cleanTitle}" (${name}). Clique em "Ler / Editar Conteúdo Completo" para ver a imagem ampliada e escrever ou colar o texto dela.`;
+              await idbPut(IDB_TEXT_STORE, matId, imgNotes);
+
+              const matObj = {
+                id: matId,
+                subjectId,
+                type: 'Imagem',
+                title: cleanTitle,
+                reference: name,
+                preview: imgNotes,
+                hasBlob: Boolean(dataUrl),
+                createdAt
+              };
+              state.materials.unshift(matObj);
+              state.selectedMaterialIds.push(matId);
+              lastAddedMat = matObj;
+              lastAddedText = imgNotes;
+              added++;
+            } else if (isZipDoc) {
+              await idbPut(IDB_BLOB_STORE, matId, file);
+              let extracted = '';
+              try {
+                const buffer = await file.arrayBuffer();
+                extracted = await extractTextFromZipDocument(buffer);
+              } catch (e) {}
+              const finalText = extracted && extracted.trim().length > 0
+                ? extracted.trim()
+                : `Documento "${name}" anexado. Clique em "Editar / Completar Texto" para revisar ou colar o texto.`;
+              await idbPut(IDB_TEXT_STORE, matId, finalText);
+
+              const matObj = {
+                id: matId,
+                subjectId,
+                type: 'Documento',
+                title: cleanTitle,
+                reference: name,
+                preview: finalText.slice(0, 1200),
+                hasBlob: true,
+                createdAt
+              };
+              state.materials.unshift(matObj);
+              state.selectedMaterialIds.push(matId);
+              lastAddedMat = matObj;
+              lastAddedText = finalText;
+              added++;
+            } else if (isRtf || isHtml || isTxt) {
+              const rawText = await readSmartTextBuffer(file);
+              let parsedText = rawText;
+              if (isRtf) parsedText = extractTextFromRtf(rawText);
+              else if (isHtml) parsedText = extractTextFromHtmlMarkup(rawText);
+              const finalText = (parsedText || rawText || '').trim() || `Arquivo "${name}" sem conteúdo textual.`;
+              await idbPut(IDB_TEXT_STORE, matId, finalText);
+
+              const matObj = {
+                id: matId,
+                subjectId,
+                type: 'Texto',
+                title: cleanTitle,
+                reference: name,
+                preview: finalText.slice(0, 1200),
+                hasBlob: false,
+                createdAt
+              };
+              state.materials.unshift(matObj);
+              state.selectedMaterialIds.push(matId);
+              lastAddedMat = matObj;
+              lastAddedText = finalText;
+              added++;
+            } else {
+              const fallbackRaw = await readSmartTextBuffer(file);
+              const printable = fallbackRaw.replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\uFFFF]/g, ' ').replace(/\s{3,}/g, ' ').trim();
+              const finalText = printable.length >= 12
+                ? printable
+                : `Arquivo "${name}" anexado. Clique em "Editar / Completar Texto" para inserir o texto do material.`;
+              await idbPut(IDB_TEXT_STORE, matId, finalText);
+
+              const matObj = {
+                id: matId,
+                subjectId,
+                type: 'Arquivo',
+                title: cleanTitle,
+                reference: name,
+                preview: finalText.slice(0, 1200),
+                hasBlob: false,
+                createdAt
+              };
+              state.materials.unshift(matObj);
+              state.selectedMaterialIds.push(matId);
+              lastAddedMat = matObj;
+              lastAddedText = finalText;
+              added++;
+            }
+          } catch (fileErr) {
+            updateUploadDiagnostic(
+              `Erro ao processar "${file && file.name ? file.name : 'arquivo'}": ${fileErr && fileErr.message ? fileErr.message : 'falha inesperada'}.`,
+              'Erro',
+              'error'
+            );
+          }
+        }
+
+        if (added > 0) {
+          await persistState();
+          renderVault();
+          if (lastAddedMat) {
+            showLatestExtractedPanel(lastAddedMat, lastAddedText);
+          }
+          const extractedWords = countWordsInText(lastAddedText);
+          updateUploadDiagnostic(
+            `Concluído: ${added} arquivo(s) anexado(s) (${totalKb} KB) • ${extractedWords} palavras extraídas e salvas no acervo.`,
+            'Anexado ✓',
+            'success'
+          );
+          notify(`${added} arquivo(s) lido(s) e salvo(s) com sucesso!`);
+        }
+      }
+
+      window.__athenaeumHandleFiles = function (fileList, inputEl) {
+        if (fileList && fileList.length > 0) {
+          processUploadedFiles(fileList).finally(() => {
+            if (inputEl) {
+              try { inputEl.value = ''; } catch (e) {}
+            }
+          });
+        }
+      };
+
+      async function saveManualMaterial() {
+        const format = document.getElementById('manual-format').value;
+        const title = document.getElementById('manual-title').value.trim();
+        const ref = document.getElementById('manual-ref').value.trim();
+        const body = document.getElementById('manual-body').value.trim();
+
+        if (!title || !body) {
+          notify('Preencha o título e o conteúdo do material antes de salvar.', true);
+          return;
+        }
+
+        const subjectId = resolveSubjectIdFromInputs();
+        const matId = 'mat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+
+        await idbPut(IDB_TEXT_STORE, matId, body);
+
+        const matObj = {
+          id: matId,
+          subjectId,
+          type: format,
+          title,
+          reference: ref || `${format} - Registro de Estudo`,
+          preview: body.slice(0, 1200),
+          hasBlob: false,
+          createdAt: new Date().toLocaleDateString('pt-BR')
+        };
+        state.materials.unshift(matObj);
+        state.selectedMaterialIds.push(matId);
+
+        document.getElementById('manual-title').value = '';
+        document.getElementById('manual-ref').value = '';
+        document.getElementById('manual-body').value = '';
+
+        await persistState();
+        renderVault();
+        showLatestExtractedPanel(matObj, body);
+        notify('Material salvo permanentemente no acervo!');
+      }
+
+      async function openReaderModal(matId) {
+        const mat = state.materials.find(m => m.id === matId);
+        if (!mat) return;
+        editingMaterialId = matId;
+
+        const modal = document.getElementById('reader-modal');
+        const badge = document.getElementById('modal-mat-badge');
+        const title = document.getElementById('modal-mat-title');
+        const textarea = document.getElementById('modal-mat-textarea');
+        const imgBox = document.getElementById('modal-image-preview');
+        const openPdfBtn = document.getElementById('modal-open-pdf-btn');
+
+        badge.textContent = mat.type;
+        title.textContent = mat.title;
+        const fullText = (await idbGet(IDB_TEXT_STORE, matId)) || getMaterialFullText(mat);
+        textarea.value = fullText;
+
+        imgBox.innerHTML = '';
+        imgBox.classList.add('hidden');
+        openPdfBtn.classList.add('hidden');
+
+        if (mat.type === 'Imagem') {
+          const dataUrl = await idbGet(IDB_BLOB_STORE, matId);
+          if (typeof dataUrl === 'string' && dataUrl.startsWith('data:image')) {
+            imgBox.innerHTML = `<img src="${dataUrl}" alt="${esc(mat.title)}" class="max-h-56 mx-auto rounded-xl border border-latte-300 object-contain" />`;
+            imgBox.classList.remove('hidden');
+          }
+        } else if (mat.type === 'PDF') {
+          openPdfBtn.classList.remove('hidden');
+        }
+
+        modal.classList.remove('hidden');
+      }
+
+      function closeReaderModal() {
+        editingMaterialId = null;
+        document.getElementById('reader-modal').classList.add('hidden');
+      }
+
+      async function saveReaderModalChanges() {
+        if (!editingMaterialId) return;
+        const mat = state.materials.find(m => m.id === editingMaterialId);
+        if (!mat) return;
+        const updatedText = document.getElementById('modal-mat-textarea').value.trim();
+        if (!updatedText) {
+          notify('O conteúdo não pode ficar vazio.', true);
+          return;
+        }
+        await idbPut(IDB_TEXT_STORE, mat.id, updatedText);
+        mat.preview = updatedText.slice(0, 1200);
+        await persistState();
+        renderVault();
+        if (memoryCache.latestMatId === mat.id) {
+          showLatestExtractedPanel(mat, updatedText);
+        }
+        closeReaderModal();
+        notify('Texto do material atualizado e salvo permanentemente!');
+      }
+
+      async function openOriginalPdfBlob(matId) {
+        if (memoryCache.blobUrls[matId]) {
+          window.open(memoryCache.blobUrls[matId], '_blank', 'noopener');
+          return;
+        }
+        const blob = await idbGet(IDB_BLOB_STORE, matId);
+        if (blob instanceof Blob) {
+          const url = URL.createObjectURL(blob);
+          memoryCache.blobUrls[matId] = url;
+          window.open(url, '_blank', 'noopener');
+          return;
+        }
+        notify('Visualize ou edite todo o texto extraído na caixa acima.', true);
+      }
+
+      async function removeMaterial(matId) {
+        await idbDelete(IDB_TEXT_STORE, matId);
+        await idbDelete(IDB_BLOB_STORE, matId);
+        if (memoryCache.blobUrls[matId]) {
+          try { URL.revokeObjectURL(memoryCache.blobUrls[matId]); } catch (e) {}
+          delete memoryCache.blobUrls[matId];
+        }
+        if (memoryCache.latestMatId === matId) {
+          const banner = document.getElementById('latest-extracted-banner');
+          if (banner) banner.classList.add('hidden');
+        }
+        state.materials = state.materials.filter(m => m.id !== matId);
+        state.selectedMaterialIds = state.selectedMaterialIds.filter(id => id !== matId);
+        await persistState();
+        renderVault();
+        notify('Material removido do acervo.');
+      }
+
+      async function removeSubject(subjId) {
+        if (subjId === 'subj-outros') return;
+        state.materials.forEach(m => {
+          if (m.subjectId === subjId) m.subjectId = 'subj-outros';
+        });
+        state.subjects = state.subjects.filter(s => s.id !== subjId);
+        await persistState();
+        renderVault();
+        notify('Matéria removida. Os materiais foram movidos para Outros.');
+      }
+
+      function renderVault() {
+        const container = document.getElementById('vault-subjects-list');
+        if (!container) return;
+
+        const filteredSubjects = state.subjects.filter(s => {
+          if (activeCategoryFilter === 'all') return true;
+          return s.category === activeCategoryFilter;
+        });
+
+        if (filteredSubjects.length === 0) {
+          container.innerHTML = `<div class="bg-latte-50 border border-latte-300 rounded-2xl p-8 text-center text-xs text-latte-600">Nenhuma matéria encontrada nesta categoria.</div>`;
+          return;
+        }
+
+        container.innerHTML = filteredSubjects.map(subj => {
+          const mats = state.materials.filter(m => m.subjectId === subj.id);
+          return `
+            <div class="bg-latte-50 border border-latte-300 rounded-2xl overflow-hidden shadow-sm">
+              <div class="px-5 py-3.5 bg-latte-200/80 border-b border-latte-300 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 flex-wrap">
+                  <h4 class="font-editorial font-bold text-base text-wine-800">${esc(subj.name)}</h4>
+                  <span class="px-2 py-0.5 rounded-full bg-latte-50 border border-latte-300 text-[10px] font-bold text-latte-700">${esc(subj.category)}</span>
+                  <span class="text-xs text-latte-600 font-semibold">(${mats.length} ${mats.length === 1 ? 'material' : 'materiais'})</span>
+                </div>
+                ${subj.id !== 'subj-outros' ? `
+                  <button type="button" data-remove-subject="${subj.id}" class="cursor-pointer text-xs font-bold text-rose-700 hover:underline">Excluir matéria</button>
+                ` : ''}
+              </div>
+
+              <div class="p-5">
+                ${mats.length === 0 ? `
+                  <p class="text-xs text-latte-600 text-center py-4">Nenhum material nesta matéria ainda. Selecione um arquivo acima para começar.</p>
+                ` : `
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    ${mats.map(mat => {
+                      const isSel = state.selectedMaterialIds.includes(mat.id);
+                      const summary = formatMaterialExtractedSummary(mat);
+                      return `
+                        <div class="rounded-2xl border-2 p-4 transition flex flex-col justify-between gap-3 ${
+                          isSel ? 'bg-wine-50/70 border-wine-700 shadow-xs' : 'bg-latte-100/70 border-latte-300'
+                        }">
+                          <div class="space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                              <span class="px-2 py-0.5 rounded-md bg-wine-700 text-white text-[10px] font-bold uppercase">${esc(mat.type)}</span>
+                              <button type="button" data-remove-material="${mat.id}" class="cursor-pointer text-[11px] font-semibold text-latte-500 hover:text-rose-700">Remover</button>
+                            </div>
+                            <h5 class="font-bold text-sm text-latte-900 line-clamp-2">${esc(mat.title)}</h5>
+                            <p class="text-[11px] text-latte-600">${esc(mat.reference)} • ${esc(mat.createdAt)}</p>
+                            <div class="p-2.5 rounded-xl bg-latte-50 border border-latte-200 space-y-1.5">
+                              <div class="flex items-center justify-between text-[10px] font-bold text-wine-800">
+                                <span>TEXTO EXTRAÍDO</span>
+                                <span>${summary.words} palavras</span>
+                              </div>
+                              <p class="text-xs text-latte-800 leading-relaxed break-words">${esc(summary.excerpt)}</p>
+                            </div>
+                          </div>
+                          <div class="space-y-2 pt-1">
+                            <button type="button" data-open-reader="${mat.id}" class="cursor-pointer w-full py-1.5 px-3 rounded-xl bg-latte-200 hover:bg-latte-300 text-wine-800 text-xs font-bold transition">
+                              Ler / Editar Conteúdo Completo
+                            </button>
+                            <button type="button" data-toggle-material="${mat.id}" class="cursor-pointer w-full py-2 px-3 rounded-xl text-xs font-bold transition ${
+                              isSel ? 'bg-wine-700 text-white' : 'bg-latte-50 hover:bg-latte-200 text-latte-900 border border-latte-300'
+                            }">
+                              ${isSel ? '✓ Selecionado para Uso' : 'Clique para Selecionar'}
+                            </button>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // =======================================================================
+      // 8. MOTOR DE MINERAÇÃO TEXTUAL & GERADOR DE QUESTÕES DIVERSAS (8 TIPOS)
+      // =======================================================================
+      const STOPWORDS_PT = new Set([
+        'para', 'como', 'mais', 'menos', 'muito', 'muita', 'muitos', 'muitas',
+        'sobre', 'entre', 'desde', 'apenas', 'ainda', 'também', 'assim', 'desse',
+        'dessa', 'deste', 'desta', 'disso', 'disto', 'nesse', 'nessa', 'neste',
+        'nesta', 'nisso', 'nisto', 'pelo', 'pela', 'pelos', 'pelas', 'onde',
+        'quando', 'qual', 'quais', 'quem', 'cujo', 'cuja', 'cujos', 'cujas',
+        'cada', 'todo', 'toda', 'todos', 'todas', 'outro', 'outra', 'outros',
+        'outras', 'mesmo', 'mesma', 'mesmos', 'mesmas', 'próprio', 'própria',
+        'foram', 'eram', 'será', 'serão', 'seja', 'sejam', 'fosse', 'fossem',
+        'tenha', 'tenham', 'tinha', 'tinham', 'pode', 'podem', 'podia', 'podiam',
+        'deve', 'devem', 'devia', 'deviam', 'estar', 'está', 'estão', 'estava',
+        'estavam', 'sendo', 'sido', 'feito', 'feita', 'feitos', 'feitas', 'forma',
+        'modo', 'meio', 'parte', 'caso', 'casos', 'exemplo', 'exemplos', 'através',
+        'conforme', 'segundo', 'acordo', 'diante', 'perante', 'após', 'antes',
+        'durante', 'enquanto', 'embora', 'contudo', 'porém', 'todavia', 'entretanto',
+        'portanto', 'logo', 'pois', 'porque', 'aquele', 'aquela', 'aqueles', 'aquelas',
+        'isso', 'isto', 'aquilo', 'eles', 'elas', 'você', 'vocês', 'nós', 'vos',
+        'lhes', 'seus', 'suas', 'nosso', 'nossa'
+      ]);
+
+      function extractSignificantTerms(sentence) {
+        const words = sentence
+          .replace(/[()[\]{}"'“”«».,;:!?/\\]/g, ' ')
+          .split(/\s+/)
+          .map(w => w.trim())
+          .filter(w => w.length >= 5 && !STOPWORDS_PT.has(w.toLowerCase()) && !/^\d+$/.test(w));
+
+        const unique = [];
+        const seen = new Set();
+        words.forEach(w => {
+          const low = w.toLowerCase();
+          if (!seen.has(low)) {
+            seen.add(low);
+            unique.push(w);
+          }
+        });
+        return unique;
+      }
+
+      function mineTextKnowledge(materials) {
+        const units = [];
+        const globalTermPool = [];
+        const seenTerms = new Set();
+
+        materials.forEach(mat => {
+          const subj = state.subjects.find(s => s.id === mat.subjectId);
+          const subjectName = subj ? subj.name : 'Outros';
+          const rawText = getMaterialFullText(mat);
+
+          const paragraphs = rawText
+            .split(/\n+/)
+            .map(p => p.replace(/\s+/g, ' ').trim())
+            .filter(p => p.length >= 18);
+
+          let sentenceCounter = 0;
+
+          paragraphs.forEach((para, pIdx) => {
+            const rawSentences = para
+              .split(/(?<=[.!?])\s+/)
+              .map(s => s.trim())
+              .filter(s => s.length >= 22 && s.length <= 360);
+
+            const effectiveSentences = rawSentences.length > 0 ? rawSentences : [para.slice(0, 340)];
+
+            effectiveSentences.forEach(sentence => {
+              sentenceCounter++;
+              const terms = extractSignificantTerms(sentence);
+              terms.forEach(t => {
+                const low = t.toLowerCase();
+                if (!seenTerms.has(low)) {
+                  seenTerms.add(low);
+                  globalTermPool.push(t);
+                }
+              });
+
+              const defMatch = sentence.match(/^([^,.;:]{4,65}?)\s+(?:é|são|consiste em|consistem em|define-se como|representa|significa|corresponde a)\s+(.{15,})$/i);
+              const causalMatch = sentence.match(/^(.{15,}?)\s+(?:porque|visto que|uma vez que|devido a|em razão de|resulta em|provoca|gera|acarreta|leva a)\s+(.{15,})$/i);
+              const contrastMatch = sentence.match(/^(.{15,}?)[,;]\s*(?:porém|contudo|todavia|entretanto|no entanto|ao contrário|diferentemente de|enquanto)\s+(.{15,})$/i);
+
+              units.push({
+                id: `${mat.id}-s-${sentenceCounter}`,
+                materialId: mat.id,
+                materialTitle: mat.title,
+                subjectName,
+                paragraphIndex: pIdx + 1,
+                sentenceIndex: sentenceCounter,
+                reference: `${mat.title} (Parágrafo ${pIdx + 1}, Trecho ${sentenceCounter})`,
+                fact: sentence,
+                terms,
+                defSubject: defMatch ? defMatch[1].trim() : null,
+                defPredicate: defMatch ? defMatch[2].trim() : null,
+                causalLeft: causalMatch ? causalMatch[1].trim() : null,
+                causalRight: causalMatch ? causalMatch[2].trim() : null,
+                contrastLeft: contrastMatch ? contrastMatch[1].trim() : null,
+                contrastRight: contrastMatch ? contrastMatch[2].trim() : null
+              });
+            });
+          });
+        });
+
+        return { units, globalTermPool };
+      }
+
+      function rotateArray(arr, offset) {
+        if (!arr || arr.length === 0) return arr;
+        const k = ((offset % arr.length) + arr.length) % arr.length;
+        return arr.slice(k).concat(arr.slice(0, k));
+      }
+
+      function mutateSentenceToFalse(sentence, altTerm) {
+        if (/\b(?:não|nunca|jamais)\b/i.test(sentence)) {
+          return sentence.replace(/\b(?:não|nunca|jamais)\s+/i, '');
+        }
+        if (/\b(?:aumenta|eleva|amplia|estimula|favorece|permite|garante|promove)\b/i.test(sentence)) {
+          return sentence
+            .replace(/\baumenta\b/i, 'reduz')
+            .replace(/\beleva\b/i, 'diminui')
+            .replace(/\bamplia\b/i, 'restringe')
+            .replace(/\bestimula\b/i, 'inibe')
+            .replace(/\bfavorece\b/i, 'impede')
+            .replace(/\bpermite\b/i, 'proíbe')
+            .replace(/\bgarante\b/i, 'elimina')
+            .replace(/\bpromove\b/i, 'bloqueia');
+        }
+        if (/\b(?:reduz|diminui|restringe|inibe|impede|proíbe|limita)\b/i.test(sentence)) {
+          return sentence
+            .replace(/\breduz\b/i, 'aumenta')
+            .replace(/\bdiminui\b/i, 'eleva')
+            .replace(/\brestringe\b/i, 'amplia')
+            .replace(/\binibe\b/i, 'estimula')
+            .replace(/\bimpede\b/i, 'permite')
+            .replace(/\bproíbe\b/i, 'obriga')
+            .replace(/\blimita\b/i, 'expande');
+        }
+        if (/\b(?:é|são|deve|devem|pode|podem|constitui|representa)\b/i.test(sentence)) {
+          return sentence.replace(/\b(é|são|deve|devem|pode|podem|constitui|representa)\b/i, 'não $1');
+        }
+        if (altTerm) {
+          return `Diferentemente do texto, afirma-se que "${altTerm}" invalida o fato de que ${sentence.charAt(0).toLowerCase() + sentence.slice(1)}`;
+        }
+        return `Ao contrário do exposto no material, nega-se que ${sentence.charAt(0).toLowerCase() + sentence.slice(1)}`;
+      }
+
+      function trimExcerpt(str, maxLen = 175) {
+        if (!str) return '';
+        return str.length > maxLen ? str.slice(0, maxLen - 3).trim() + '...' : str;
+      }
+
+      function generateQuiz(silent = false) {
+        const selected = getSelectedMaterials();
+        renderAllDirectPickers();
+
+        if (selected.length === 0) {
+          quizQuestions = [];
+          renderQuizList();
+          if (!silent) notify('Selecione ao menos um material acima antes de gerar questões.', true);
+          return;
+        }
+
+        const total = parseInt(document.getElementById('quiz-count').value, 10) || 55;
+        const styleFilter = document.getElementById('quiz-style').value;
+        const { units, globalTermPool } = mineTextKnowledge(selected);
+
+        if (units.length === 0) {
+          if (!silent) notify('O material selecionado ainda não possui texto suficiente.', true);
+          return;
+        }
+
+        let archetypes = ['direct', 'incorrect', 'cloze', 'causal', 'contrast', 'tf', 'case', 'association'];
+        if (styleFilter === 'mc') archetypes = ['direct', 'incorrect', 'association'];
+        if (styleFilter === 'cloze') archetypes = ['cloze', 'direct', 'association'];
+        if (styleFilter === 'causal') archetypes = ['causal', 'contrast', 'case'];
+        if (styleFilter === 'tf') archetypes = ['tf'];
+
+        const generated = [];
+
+        for (let i = 0; i < total; i++) {
+          const u = units[i % units.length];
+          const u2 = units[(i + 1) % units.length];
+          const u3 = units[(i + 2) % units.length];
+          const u4 = units[(i + 3) % units.length];
+
+          let arch = archetypes[i % archetypes.length];
+          if (styleFilter === 'mixed') {
+            if (u.causalLeft && i % 4 === 0) arch = 'causal';
+            else if (u.contrastLeft && i % 4 === 1) arch = 'contrast';
+            else if (u.defSubject && i % 4 === 2) arch = 'definition';
+          }
+
+          const f1 = trimExcerpt(u.fact, 175);
+          const f2 = trimExcerpt(u2.fact, 155);
+          const f3 = trimExcerpt(u3.fact, 155);
+          const f4 = trimExcerpt(u4.fact, 155);
+          const altTerm = globalTermPool[(i * 3) % Math.max(1, globalTermPool.length)] || 'conceito secundário';
+
+          if (arch === 'tf') {
+            const isTrue = i % 2 === 0;
+            const statement = isTrue ? u.fact : mutateSentenceToFalse(u.fact, altTerm);
+
+            generated.push({
+              id: `q-${Date.now()}-${i}`,
+              number: i + 1,
+              typeLabel: 'Certo ou Errado (Texto)',
+              subjectName: u.subjectName,
+              materialTitle: u.materialTitle,
+              reference: u.reference,
+              excerpt: u.fact,
+              prompt: `[Item ${i + 1} • ${u.subjectName}] De acordo com o texto de "${u.materialTitle}", julgue a assertiva a seguir: "${statement}"`,
+              options: [
+                {
+                  text: 'Certo — Está em conformidade com o texto do material.',
+                  isCorrect: isTrue,
+                  comment: isTrue
+                    ? `Correto! O trecho encontra respaldo direto em ${u.reference}: "${trimExcerpt(u.fact, 140)}".`
+                    : `Incorreto. O enunciado alterou o sentido original registrado em ${u.reference}.`
+                },
+                {
+                  text: 'Errado — Contraria ou distorce o que está escrito no material.',
+                  isCorrect: !isTrue,
+                  comment: !isTrue
+                    ? `Correto! Você identificou a distorção em relação ao trecho original: "${trimExcerpt(u.fact, 140)}".`
+                    : `Incorreto. A assertiva reproduz fielmente o conteúdo de ${u.reference}.`
+                }
+              ],
+              chosenIndex: null
+            });
+          } else if (arch === 'cloze' && u.terms.length > 0) {
+            const targetTerm = u.terms[i % u.terms.length];
+            const regexTerm = new RegExp(`\\b${targetTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
+            const clozedSentence = u.fact.replace(regexTerm, '________________');
+
+            const distractors = globalTermPool
+              .filter(t => t.toLowerCase() !== targetTerm.toLowerCase())
+              .slice(0, 12);
+
+            const dA = distractors[(i + 1) % Math.max(1, distractors.length)] || 'conceito inverso';
+            const dB = distractors[(i + 3) % Math.max(1, distractors.length)] || 'exceção isolada';
+            const dC = distractors[(i + 5) % Math.max(1, distractors.length)] || 'hipótese excluída';
+            const dD = distractors[(i + 7) % Math.max(1, distractors.length)] || 'fator secundário';
+
+            const opts = [
+              {
+                text: targetTerm,
+                isCorrect: true,
+                comment: `Correto! No texto original (${u.reference}), o termo exato que preenche a lacuna é "${targetTerm}".`
+              },
+              {
+                text: dA,
+                isCorrect: false,
+                comment: `Incorreta. Embora "${dA}" apareça no acervo, não é o termo empregado neste contexto de ${u.reference}.`
+              },
+              {
+                text: dB,
+                isCorrect: false,
+                comment: `Incorreta. "${dB}" refere-se a outro segmento do material, alterando o sentido da frase.`
+              },
+              {
+                text: dC,
+                isCorrect: false,
+                comment: `Incorreta. A substituição por "${dC}" torna a afirmação incompatível com ${u.reference}.`
+              },
+              {
+                text: dD,
+                isCorrect: false,
+                comment: `Incorreta. O texto estabelece especificamente "${targetTerm}" nessa passagem.`
+              }
+            ];
+
+            generated.push({
+              id: `q-${Date.now()}-${i}`,
+              number: i + 1,
+              typeLabel: 'Lacuna Contextual',
+              subjectName: u.subjectName,
+              materialTitle: u.materialTitle,
+              reference: u.reference,
+              excerpt: u.fact,
+              prompt: `[Questão ${i + 1} • ${u.subjectName}] Complete a lacuna conforme o texto de "${u.materialTitle}": "${clozedSentence}"`,
+              options: rotateArray(opts, i % 5),
+              chosenIndex: null
+            });
+          } else if (arch === 'incorrect') {
+            const falseClaim = trimExcerpt(mutateSentenceToFalse(u.fact, altTerm), 175);
+            const opts = [
+              {
+                text: falseClaim,
+                isCorrect: true,
+                comment: `Gabarito correto (esta é a afirmação INCORRETA)! O texto original em ${u.reference} afirma justamente o oposto: "${trimExcerpt(u.fact, 130)}".`
+              },
+              {
+                text: f2,
+                isCorrect: false,
+                comment: `Afirmação verdadeira segundo ${u2.reference} (por isso não é a resposta pedida, pois a questão busca a incorreta).`
+              },
+              {
+                text: f3,
+                isCorrect: false,
+                comment: `Afirmação verdadeira extraída de ${u3.reference}.`
+              },
+              {
+                text: f4,
+                isCorrect: false,
+                comment: `Afirmação verdadeira fundamentada em ${u4.reference}.`
+              },
+              {
+                text: `Segundo ${u.materialTitle}, o conceito de "${u.terms[0] || u.subjectName}" integra o desenvolvimento apresentado no parágrafo ${u.paragraphIndex}.`,
+                isCorrect: false,
+                comment: `Afirmação verdadeira e coerente com a estrutura de ${u.reference}.`
+              }
+            ];
+
+            generated.push({
+              id: `q-${Date.now()}-${i}`,
+              number: i + 1,
+              typeLabel: 'Identificar Incorreta',
+              subjectName: u.subjectName,
+              materialTitle: u.materialTitle,
+              reference: u.reference,
+              excerpt: u.fact,
+              prompt: `[Questão ${i + 1} • ${u.subjectName}] Com base exclusivamente no material "${u.materialTitle}", assinale a única alternativa INCORRETA:`,
+              options: rotateArray(opts, (i + 2) % 5),
+              chosenIndex: null
+            });
+          } else if (arch === 'causal' && u.causalLeft && u.causalRight) {
+            const opts = [
+              {
+                text: trimExcerpt(u.causalRight, 175),
+                isCorrect: true,
+                comment: `Correto! O texto estabelece diretamente essa relação de causa/efeito em ${u.reference}.`
+              },
+              {
+                text: trimExcerpt(mutateSentenceToFalse(u.causalRight, altTerm), 165),
+                isCorrect: false,
+                comment: `Incorreta. Inverte o efeito/justificativa descrito em ${u.reference}.`
+              },
+              {
+                text: f2,
+                isCorrect: false,
+                comment: `Incorreta. Esse trecho pertence a outro ponto (${u2.reference}) e não explica a causa perguntada.`
+              },
+              {
+                text: f3,
+                isCorrect: false,
+                comment: `Incorreta. Trata-se de informação distinta retirada de ${u3.reference}.`
+              },
+              {
+                text: `O material não estabelece qualquer relação causal envolvendo "${u.terms[0] || u.subjectName}".`,
+                isCorrect: false,
+                comment: `Incorreta. A relação causal está explícita em ${u.reference}.`
+              }
+            ];
+
+            generated.push({
+              id: `q-${Date.now()}-${i}`,
+              number: i + 1,
+              typeLabel: 'Causa & Consequência',
+              subjectName: u.subjectName,
+              materialTitle: u.materialTitle,
+              reference: u.reference,
+              excerpt: u.fact,
+              prompt: `[Questão ${i + 1} • ${u.subjectName}] Segundo "${u.materialTitle}", no que diz respeito a "${trimExcerpt(u.causalLeft, 130)}", qual é a causa ou consequência apontada no texto?`,
+              options: rotateArray(opts, (i + 1) % 5),
+              chosenIndex: null
+            });
+          } else if (arch === 'contrast' && u.contrastLeft && u.contrastRight) {
+            const opts = [
+              {
+                text: trimExcerpt(u.contrastRight, 175),
+                isCorrect: true,
+                comment: `Correto! Essa é exatamente a ressalva/oposição apresentada pelo autor em ${u.reference}.`
+              },
+              {
+                text: `Conclui-se que não há qualquer distinção ou ressalva em relação a "${trimExcerpt(u.contrastLeft, 100)}".`,
+                isCorrect: false,
+                comment: `Incorreta. O texto traz expressamente o contraste em ${u.reference}.`
+              },
+              {
+                text: f2,
+                isCorrect: false,
+                comment: `Incorreta. Mistura um enunciado de ${u2.reference} que não corresponde ao contraste analisado.`
+              },
+              {
+                text: trimExcerpt(mutateSentenceToFalse(u.contrastRight, altTerm), 165),
+                isCorrect: false,
+                comment: `Incorreta. Distorce o sentido da ressalva apresentada em ${u.reference}.`
+              },
+              {
+                text: f3,
+                isCorrect: false,
+                comment: `Incorreta. Conteúdo deslocado de ${u3.reference}.`
+              }
+            ];
+
+            generated.push({
+              id: `q-${Date.now()}-${i}`,
+              number: i + 1,
+              typeLabel: 'Contraste & Ressalva',
+              subjectName: u.subjectName,
+              materialTitle: u.materialTitle,
+              reference: u.reference,
+              excerpt: u.fact,
+              prompt: `[Questão ${i + 1} • ${u.subjectName}] Ao abordar "${trimExcerpt(u.contrastLeft, 130)}" no material "${u.materialTitle}", qual contraponto ou ressalva o texto destaca?`,
+              options: rotateArray(opts, (i + 3) % 5),
+              chosenIndex: null
+            });
+          } else if (arch === 'definition' && u.defSubject && u.defPredicate) {
+            const opts = [
+              {
+                text: trimExcerpt(u.defPredicate, 175),
+                isCorrect: true,
+                comment: `Correto! Definição extraída diretamente de ${u.reference}.`
+              },
+              {
+                text: trimExcerpt(mutateSentenceToFalse(u.defPredicate, altTerm), 165),
+                isCorrect: false,
+                comment: `Incorreta. Altera elementos essenciais da definição registrada em ${u.reference}.`
+              },
+              {
+                text: f2,
+                isCorrect: false,
+                comment: `Incorreta. Refere-se a outro conceito localizado em ${u2.reference}.`
+              },
+              {
+                text: f3,
+                isCorrect: false,
+                comment: `Incorreta. Enunciado pertencente a ${u3.reference}.`
+              },
+              {
+                text: `Um conceito oposto ao que o texto descreve em ${u.reference}.`,
+                isCorrect: false,
+                comment: `Incorreta. O texto define "${u.defSubject}" de forma clara em ${u.reference}.`
+              }
+            ];
+
+            generated.push({
+              id: `q-${Date.now()}-${i}`,
+              number: i + 1,
+              typeLabel: 'Definição Conceitual',
+              subjectName: u.subjectName,
+              materialTitle: u.materialTitle,
+              reference: u.reference,
+              excerpt: u.fact,
+              prompt: `[Questão ${i + 1} • ${u.subjectName}] Conforme o texto de "${u.materialTitle}", como se define ou caracteriza "${u.defSubject}"?`,
+              options: rotateArray(opts, i % 5),
+              chosenIndex: null
+            });
+          } else if (arch === 'case') {
+            const keyFocus = u.terms.slice(0, 2).join(' e ') || u.subjectName;
+            const opts = [
+              {
+                text: `Aplicar a regra/fundamento do texto: "${f1}"`,
+                isCorrect: true,
+                comment: `Correto! Aplica exatamente o critério textual fundamentado em ${u.reference}.`
+              },
+              {
+                text: `Adotar procedimento contrário ao texto: "${trimExcerpt(mutateSentenceToFalse(u.fact, altTerm), 150)}"`,
+                isCorrect: false,
+                comment: `Incorreta. Viola diretamente o disposto em ${u.reference}.`
+              },
+              {
+                text: `Substituir o critério pelo enunciado isolado de outro trecho: "${f2}"`,
+                isCorrect: false,
+                comment: `Incorreta. Confunde a regra aplicável com outro segmento (${u2.reference}).`
+              },
+              {
+                text: `Restringir a aplicação apenas a "${altTerm}", ignorando ${u.reference}.`,
+                isCorrect: false,
+                comment: `Incorreta. Cria uma limitação sem base no material "${u.materialTitle}".`
+              },
+              {
+                text: `Concluir que o material não fornece critérios sobre ${keyFocus}.`,
+                isCorrect: false,
+                comment: `Incorreta. O critério está expressamente detalhado em ${u.reference}.`
+              }
+            ];
+
+            generated.push({
+              id: `q-${Date.now()}-${i}`,
+              number: i + 1,
+              typeLabel: 'Aplicação / Estudo de Caso',
+              subjectName: u.subjectName,
+              materialTitle: u.materialTitle,
+              reference: u.reference,
+              excerpt: u.fact,
+              prompt: `[Estudo de Caso #${i + 1} • ${u.subjectName}] Em uma situação prática envolvendo "${keyFocus}" analisada à luz de "${u.materialTitle}", qual conclusão está alinhada ao texto?`,
+              options: rotateArray(opts, (i + 4) % 5),
+              chosenIndex: null
+            });
+          } else {
+            const opts = [
+              {
+                text: f1,
+                isCorrect: true,
+                comment: `Alternativa correta! Corresponde fielmente ao conteúdo encontrado em ${u.reference}.`
+              },
+              {
+                text: trimExcerpt(mutateSentenceToFalse(u.fact, altTerm), 170),
+                isCorrect: false,
+                comment: `Incorreta. Distorce ou nega o sentido original de ${u.reference}.`
+              },
+              {
+                text: trimExcerpt(mutateSentenceToFalse(u2.fact, altTerm), 165),
+                isCorrect: false,
+                comment: `Incorreta. Combina uma alteração falsa sobre o conteúdo de ${u2.reference}.`
+              },
+              {
+                text: `Afirma-se que "${u.terms[0] || u.subjectName}" exclui completamente o que está descrito em ${u3.reference}.`,
+                isCorrect: false,
+                comment: `Incorreta. Cria uma oposição inexistente entre os parágrafos do material.`
+              },
+              {
+                text: `O texto de "${u.materialTitle}" não aborda aspectos relacionados a ${u.terms.slice(0, 2).join(' ou ') || u.subjectName}.`,
+                isCorrect: false,
+                comment: `Incorreta. O tema é tratado diretamente em ${u.reference}.`
+              }
+            ];
+
+            generated.push({
+              id: `q-${Date.now()}-${i}`,
+              number: i + 1,
+              typeLabel: 'Compreensão do Texto',
+              subjectName: u.subjectName,
+              materialTitle: u.materialTitle,
+              reference: u.reference,
+              excerpt: u.fact,
+              prompt: `[Questão ${i + 1} • ${u.subjectName}] De acordo com o conteúdo do material "${u.materialTitle}", assinale a alternativa correta:`,
+              options: rotateArray(opts, i % 5),
+              chosenIndex: null
+            });
+          }
+        }
+
+        quizQuestions = generated;
+        renderQuizList();
+        if (!silent) {
+          notify(`${generated.length} questões diversas geradas a partir do texto! Clique em uma alternativa para revelar o gabarito.`);
+        }
+      }
+
+      function renderQuizList() {
+        const listEl = document.getElementById('quiz-list');
+        const boardEl = document.getElementById('quiz-scoreboard');
+        if (!listEl) return;
+
+        if (quizQuestions.length === 0) {
+          if (boardEl) boardEl.classList.add('hidden');
+          listEl.innerHTML = `
+            <div class="bg-latte-50 border border-latte-300 rounded-2xl p-8 text-center">
+              <p class="font-editorial font-bold text-base text-latte-900">Nenhuma questão gerada ainda</p>
+              <p class="text-xs text-latte-600 mt-1">Selecione os materiais já enviados acima e clique em <strong>Gerar Questões do Texto</strong>.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const answered = quizQuestions.filter(q => q.chosenIndex !== null);
+        const correct = answered.filter(q => q.options[q.chosenIndex].isCorrect);
+        const wrong = answered.length - correct.length;
+
+        if (boardEl) {
+          boardEl.classList.remove('hidden');
+          document.getElementById('score-answered').textContent = `${answered.length}/${quizQuestions.length}`;
+          document.getElementById('score-correct').textContent = String(correct.length);
+          document.getElementById('score-wrong').textContent = String(wrong);
+        }
+
+        const letters = ['A', 'B', 'C', 'D', 'E'];
+
+        listEl.innerHTML = quizQuestions.map((q, qIdx) => {
+          const isAnswered = q.chosenIndex !== null;
+          return `
+            <article class="bg-latte-50 border border-latte-300 rounded-2xl p-5 shadow-sm space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full bg-wine-700 text-white text-[11px] font-bold">#${q.number}</span>
+                  <span class="px-2.5 py-0.5 rounded-full bg-latte-200 text-latte-800 text-[11px] font-bold">${esc(q.typeLabel)}</span>
+                  <span class="text-xs font-bold text-wine-800">${esc(q.subjectName)}</span>
+                </div>
+                <span class="text-[11px] text-latte-500">${isAnswered ? 'Gabarito revelado' : 'Clique em uma alternativa para ver o gabarito'}</span>
+              </div>
+
+              <p class="text-sm font-semibold text-latte-900 leading-relaxed">${esc(q.prompt)}</p>
+
+              <div class="space-y-2">
+                ${q.options.map((opt, optIdx) => {
+                  let style = 'bg-latte-100 hover:bg-latte-200/80 border-latte-300 text-latte-900';
+                  let tag = '';
+                  if (isAnswered) {
+                    if (opt.isCorrect) {
+                      style = 'bg-emerald-50 border-emerald-600 text-emerald-950 font-semibold';
+                      tag = '<span class="ml-2 px-2 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-bold">CORRETA</span>';
+                    } else if (q.chosenIndex === optIdx) {
+                      style = 'bg-rose-50 border-rose-600 text-rose-950 font-semibold';
+                      tag = '<span class="ml-2 px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold">SUA ESCOLHA (ERRO)</span>';
+                    } else {
+                      style = 'bg-latte-100/60 border-latte-200 text-latte-600';
+                    }
+                  }
+
+                  return `
+                    <button type="button" data-answer-q="${qIdx}" data-answer-opt="${optIdx}" class="cursor-pointer w-full text-left p-3.5 rounded-xl border-2 transition flex flex-col gap-1.5 ${style}">
+                      <div class="flex items-start gap-2.5">
+                        <span class="w-6 h-6 rounded-lg bg-latte-200 text-latte-900 text-xs font-extrabold flex items-center justify-center shrink-0">${letters[optIdx] || optIdx + 1}</span>
+                        <span class="text-xs sm:text-sm leading-snug flex-1">${esc(opt.text)} ${tag}</span>
+                      </div>
+                      ${isAnswered ? `
+                        <p class="pl-8 text-xs ${opt.isCorrect ? 'text-emerald-800 font-medium' : 'text-latte-700'}">
+                          <strong>Comentário:</strong> ${esc(opt.comment)}
+                        </p>
+                      ` : ''}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+
+              ${isAnswered ? `
+                <div class="p-3.5 rounded-xl bg-wine-50 border border-wine-200 text-xs text-wine-950 space-y-1">
+                  <div><strong>Fundamentação no Material:</strong> ${esc(q.reference)}</div>
+                  ${q.excerpt ? `<div class="text-wine-800 italic"><strong>Trecho base:</strong> "${esc(q.excerpt)}"</div>` : ''}
+                </div>
+              ` : ''}
+            </article>
+          `;
+        }).join('');
+      }
+
+      async function handleAnswerQuestion(qIdx, optIdx) {
+        const q = quizQuestions[qIdx];
+        if (!q) return;
+
+        const firstAttempt = q.chosenIndex === null;
+        q.chosenIndex = optIdx;
+        const picked = q.options[optIdx];
+
+        if (firstAttempt) {
+          state.quizStats.answered = (state.quizStats.answered || 0) + 1;
+          if (picked.isCorrect) {
+            state.quizStats.correct = (state.quizStats.correct || 0) + 1;
+          }
+          const subjKey = q.subjectName || 'Outros';
+          if (!state.quizStats.bySubject[subjKey]) {
+            state.quizStats.bySubject[subjKey] = { answered: 0, correct: 0 };
+          }
+          state.quizStats.bySubject[subjKey].answered += 1;
+          if (picked.isCorrect) {
+            state.quizStats.bySubject[subjKey].correct += 1;
+          }
+        }
+
+        if (!picked.isCorrect) {
+          const rightOpt = q.options.find(o => o.isCorrect);
+          const exists = state.wrongQuestions.some(w => w.prompt === q.prompt);
+          if (!exists) {
+            state.wrongQuestions.unshift({
+              id: q.id,
+              subjectName: q.subjectName,
+              materialTitle: q.materialTitle,
+              reference: q.reference,
+              excerpt: q.excerpt || '',
+              prompt: q.prompt,
+              chosenText: picked.text,
+              correctText: rightOpt ? rightOpt.text : '',
+              options: q.options
+            });
+          }
+        }
+
+        await persistState();
+        renderQuizList();
+      }
+
+      // =======================================================================
+      // 9. RAIO-X DOS ERROS & PLANO DE REVISÃO
+      // =======================================================================
+      function renderRaioX() {
+        const box = document.getElementById('raiox-container');
+        if (!box) return;
+
+        const errors = state.wrongQuestions;
+        const statsMap = state.quizStats.bySubject || {};
+        const hasRecords = errors.length > 0 || Object.keys(statsMap).length > 0;
+
+        if (!hasRecords) {
+          box.innerHTML = `
+            <div class="bg-latte-50 border border-latte-300 rounded-2xl p-8 text-center space-y-2">
+              <p class="font-editorial font-bold text-base text-latte-900">Nenhuma questão respondida ainda</p>
+              <p class="text-xs text-latte-600">Resolva questões na aba <strong>2. Questões Variadas</strong> para gerar automaticamente sua taxa de acerto por matéria e o plano de revisão.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const topics = new Set([...Object.keys(statsMap), ...errors.map(e => e.subjectName || 'Outros')]);
+        const rankedTopics = Array.from(topics).map(name => {
+          const st = statsMap[name] || { answered: 0, correct: 0 };
+          const topicErrors = errors.filter(e => (e.subjectName || 'Outros') === name);
+          const total = Math.max(st.answered, topicErrors.length);
+          const correct = Math.max(0, total - topicErrors.length);
+          const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+          return { name, total, correct, wrongCount: topicErrors.length, accuracy };
+        }).sort((a, b) => a.accuracy - b.accuracy || b.wrongCount - a.wrongCount);
+
+        box.innerHTML = `
+          <div class="bg-latte-50 border border-latte-300 rounded-2xl p-5 space-y-4">
+            <h4 class="font-editorial font-bold text-base text-wine-800">1. Aproveitamento por Tópico & Ordem Prioritária de Revisão (Pontos Fracos Primeiro)</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              ${rankedTopics.map((t, idx) => `
+                <div class="p-4 rounded-xl bg-latte-100 border border-latte-300 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="px-2 py-0.5 rounded bg-wine-700 text-white text-[10px] font-bold uppercase">Prioridade #${idx + 1}</span>
+                    <span class="text-xs font-extrabold ${t.accuracy < 60 ? 'text-rose-700' : 'text-emerald-700'}">${t.accuracy}% de acerto</span>
+                  </div>
+                  <h5 class="font-bold text-sm text-latte-900">${esc(t.name)}</h5>
+                  <div class="w-full h-2 rounded-full bg-latte-200 overflow-hidden">
+                    <div class="h-full ${t.accuracy < 60 ? 'bg-rose-600' : 'bg-emerald-600'}" style="width: ${t.accuracy}%"></div>
+                  </div>
+                  <p class="text-xs text-latte-600">${t.wrongCount} erro(s) em ${t.total} questão(ões) — ${t.wrongCount > 0 ? 'revisar este conteúdo primeiro.' : 'excelente desempenho!'}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <h4 class="font-editorial font-bold text-base text-wine-800">2. Questões Erradas para Revisão (${errors.length})</h4>
+            ${errors.length === 0 ? `
+              <p class="text-xs text-latte-600 bg-latte-50 border border-latte-300 rounded-2xl p-5">Nenhum erro registrado.</p>
+            ` : errors.map((e, i) => `
+              <div class="bg-latte-50 border border-latte-300 rounded-2xl p-4 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-wine-800">#${i + 1} • ${esc(e.subjectName)}</span>
+                  <span class="text-latte-500">${esc(e.reference)}</span>
+                </div>
+                <p class="text-xs sm:text-sm font-semibold text-latte-900">${esc(e.prompt)}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                  <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900">
+                    <strong>Sua resposta:</strong> ${esc(e.chosenText)}
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
+                    <strong>Gabarito correto:</strong> ${esc(e.correctText)}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      function retryWrongQuestions() {
+        if (state.wrongQuestions.length === 0) {
+          notify('Não há questões erradas para refazer.', true);
+          return;
+        }
+        quizQuestions = state.wrongQuestions.map((w, idx) => ({
+          id: `retry-${Date.now()}-${idx}`,
+          number: idx + 1,
+          typeLabel: 'Revisão de Erro',
+          subjectName: w.subjectName,
+          materialTitle: w.materialTitle,
+          reference: w.reference,
+          excerpt: w.excerpt || '',
+          prompt: w.prompt,
+          options: w.options,
+          chosenIndex: null
+        }));
+        switchTab('questoes');
+        renderQuizList();
+        notify('Simulado de revisão carregado com suas questões erradas!');
+      }
+
+      async function clearErrors() {
+        state.wrongQuestions = [];
+        state.quizStats = { answered: 0, correct: 0, bySubject: {} };
+        await persistState();
+        renderRaioX();
+        notify('Histórico de erros limpo.');
+      }
+
+      // =======================================================================
+      // 10. FLASHCARDS (3D FLIP + FRENTE;VERSO ANKI)
+      // =======================================================================
+      async function generateFlashcards(silent = false) {
+        const selected = getSelectedMaterials();
+        renderAllDirectPickers();
+
+        if (selected.length === 0) {
+          if (!silent) notify('Selecione ao menos um material acima antes de gerar flashcards.', true);
+          renderFlashcardsStage();
+          return;
+        }
+
+        const { units } = mineTextKnowledge(selected);
+        const cards = units.slice(0, 40).map((u, idx) => {
+          const cleanFact = u.fact.replace(/;/g, ',');
+          const cleanTitle = u.materialTitle.replace(/;/g, ',');
+          const cleanRef = u.reference.replace(/;/g, ',');
+          const questionFront = u.defSubject
+            ? `[${u.subjectName}] O que significa ou como se define "${u.defSubject.replace(/;/g, ',')}" em "${cleanTitle}"?`
+            : `[${u.subjectName}] Qual é a ideia-chave registrada em "${cleanTitle}" (${u.terms.slice(0, 2).join(', ') || 'tópico ' + (idx + 1)})?`;
+
+          return {
+            id: 'fc-' + idx,
+            subjectName: u.subjectName,
+            front: questionFront,
+            back: `${cleanFact} [Fonte: ${cleanRef}]`
+          };
+        });
+
+        state.flashcards = cards;
+        fcIndex = 0;
+        fcFlipped = false;
+        await persistState();
+        renderFlashcardsStage();
+        if (!silent) notify(`${cards.length} flashcards gerados no formato Frente;Verso!`);
+      }
+
+      function renderFlashcardsStage() {
+        const stage = document.getElementById('flashcards-stage');
+        const exportBox = document.getElementById('flashcards-export-box');
+        const rawText = document.getElementById('flashcards-raw-text');
+        const countBadge = document.getElementById('flashcards-count-badge');
+        if (!stage) return;
+
+        const cards = state.flashcards;
+        if (cards.length === 0) {
+          if (exportBox) exportBox.classList.add('hidden');
+          stage.innerHTML = `
+            <div class="bg-latte-50 border border-latte-300 rounded-2xl p-8 text-center">
+              <p class="font-editorial font-bold text-base text-latte-900">Nenhum flashcard gerado ainda</p>
+              <p class="text-xs text-latte-600 mt-1">Clique nos materiais já enviados acima e depois em <strong>Gerar Flashcards</strong>.</p>
+            </div>
+          `;
+          return;
+        }
+
+        if (fcIndex >= cards.length) fcIndex = 0;
+        const card = cards[fcIndex];
+
+        stage.innerHTML = `
+          <div class="bg-latte-50 border border-latte-300 rounded-2xl p-6 shadow-sm space-y-4">
+            <div class="flex items-center justify-between text-xs font-bold text-latte-600">
+              <span>Card ${fcIndex + 1} de ${cards.length} • ${esc(card.subjectName)}</span>
+              <span>Clique no card para virar</span>
+            </div>
+
+            <div class="perspective-1000">
+              <div id="fc-card-surface" class="cursor-pointer relative min-h-[200px] w-full transform-style-3d ${fcFlipped ? 'rotate-y-180' : ''}">
+                <!-- Frente -->
+                <div class="backface-hidden min-h-[200px] rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center bg-latte-100 text-latte-900 border-2 border-latte-300 hover:border-wine-500">
+                  <span class="text-[10px] font-bold uppercase tracking-widest mb-2 text-wine-700">FRENTE (PERGUNTA)</span>
+                  <p class="font-editorial text-base sm:text-lg font-bold leading-relaxed max-w-2xl">${esc(card.front)}</p>
+                </div>
+                <!-- Verso -->
+                <div class="backface-hidden rotate-y-180 absolute inset-0 min-h-[200px] rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center bg-wine-700 text-latte-50 border-2 border-wine-800">
+                  <span class="text-[10px] font-bold uppercase tracking-widest mb-2 text-latte-300">VERSO (RESPOSTA & FONTE)</span>
+                  <p class="font-editorial text-base sm:text-lg font-bold leading-relaxed max-w-2xl">${esc(card.back)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2">
+              <button type="button" id="fc-prev-btn" class="cursor-pointer px-4 py-2 rounded-xl bg-latte-200 hover:bg-latte-300 text-latte-900 text-xs font-bold transition">← Anterior</button>
+              <button type="button" id="fc-flip-btn" class="cursor-pointer px-5 py-2 rounded-xl bg-wine-700 hover:bg-wine-800 text-white text-xs font-bold transition">Virar Card</button>
+              <button type="button" id="fc-next-btn" class="cursor-pointer px-4 py-2 rounded-xl bg-latte-200 hover:bg-latte-300 text-latte-900 text-xs font-bold transition">Próximo →</button>
+            </div>
+          </div>
+        `;
+
+        if (exportBox && rawText && countBadge) {
+          exportBox.classList.remove('hidden');
+          countBadge.textContent = `${cards.length} cards`;
+          rawText.textContent = cards.map(c => `${c.front};${c.back}`).join('\n');
+        }
+      }
+
+      function copyAnkiCards() {
+        if (state.flashcards.length === 0) {
+          notify('Gere os flashcards primeiro.', true);
+          return;
+        }
+        const content = state.flashcards.map(c => `${c.front};${c.back}`).join('\n');
+        const temp = document.createElement('textarea');
+        temp.value = content;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        notify('Flashcards copiados no formato Frente;Verso!');
+      }
+
+      function downloadAnkiFile() {
+        if (state.flashcards.length === 0) {
+          notify('Gere os flashcards primeiro.', true);
+          return;
+        }
+        const content = state.flashcards.map(c => `${c.front};${c.back}`).join('\n');
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'flashcards_anki_frente_verso.txt';
+        link.click();
+        URL.revokeObjectURL(url);
+        notify('Arquivo .TXT baixado para importar no Anki!');
+      }
+
+      // =======================================================================
+      // 11. CHECKLIST DE ESTUDOS & CRONOGRAMA (7, 15 E 30 DIAS)
+      // =======================================================================
+      async function addChecklistTopic() {
+        const titleEl = document.getElementById('chk-topic-name');
+        const subsEl = document.getElementById('chk-subitems-list');
+        const title = titleEl.value.trim();
+        const subsRaw = subsEl.value.trim();
+
+        if (!title) {
+          notify('Digite o nome do tópico antes de criar.', true);
+          return;
+        }
+
+        const subItems = subsRaw
+          ? subsRaw.split(',').map(s => s.trim()).filter(Boolean).map((name, i) => ({
+              id: `sub-${Date.now()}-${i}`,
+              name,
+              done: false
+            }))
+          : [{ id: `sub-${Date.now()}-0`, name: title, done: false }];
+
+        state.checklistTopics.unshift({
+          id: `chk-${Date.now()}`,
+          title,
+          items: subItems
+        });
+
+        titleEl.value = '';
+        subsEl.value = '';
+        await persistState();
+        renderChecklist();
+        notify('Tópico criado e salvo no checklist!');
+      }
+
+      async function toggleChecklistItem(topicId, subId) {
+        const topic = state.checklistTopics.find(t => t.id === topicId);
+        if (!topic) return;
+        const item = topic.items.find(i => i.id === subId);
+        if (item) {
+          item.done = !item.done;
+          await persistState();
+          renderChecklist();
+        }
+      }
+
+      async function appendChecklistSubItem(topicId) {
+        const input = document.getElementById('new-sub-' + topicId);
+        if (!input) return;
+        const val = input.value.trim();
+        if (!val) return;
+        const topic = state.checklistTopics.find(t => t.id === topicId);
+        if (!topic) return;
+        topic.items.push({
+          id: `sub-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+          name: val,
+          done: false
+        });
+        input.value = '';
+        await persistState();
+        renderChecklist();
+      }
+
+      async function deleteChecklistTopic(topicId) {
+        state.checklistTopics = state.checklistTopics.filter(t => t.id !== topicId);
+        await persistState();
+        renderChecklist();
+      }
+
+      function renderChecklist() {
+        const grid = document.getElementById('checklist-grid');
+        if (!grid) return;
+
+        if (state.checklistTopics.length === 0) {
+          grid.innerHTML = `
+            <div class="md:col-span-2 bg-latte-50 border border-latte-300 rounded-2xl p-8 text-center">
+              <p class="font-editorial font-bold text-base text-latte-900">Seu checklist de estudos está vazio</p>
+              <p class="text-xs text-latte-600 mt-1">Crie acima um tópico e adicione as matérias/tarefas dentro dele para acompanhar sua evolução.</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = state.checklistTopics.map(topic => {
+          const total = topic.items.length;
+          const done = topic.items.filter(i => i.done).length;
+          const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+          return `
+            <div class="bg-latte-50 border border-latte-300 rounded-2xl p-5 shadow-sm flex flex-col justify-between gap-4">
+              <div class="space-y-3">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 class="font-editorial font-bold text-base text-wine-800">${esc(topic.title)}</h4>
+                    <p class="text-xs text-latte-600 font-semibold">${done} de ${total} concluídos (${pct}%)</p>
+                  </div>
+                  <button type="button" data-del-chk="${topic.id}" class="cursor-pointer text-xs font-bold text-rose-700 hover:underline">Excluir</button>
+                </div>
+
+                <div class="w-full h-2 rounded-full bg-latte-200 overflow-hidden">
+                  <div class="h-full bg-wine-700 transition-all" style="width: ${pct}%"></div>
+                </div>
+
+                <div class="space-y-1.5 pt-1">
+                  ${topic.items.map(item => `
+                    <label class="flex items-center gap-2.5 p-2 rounded-xl bg-latte-100 hover:bg-latte-200/70 cursor-pointer transition">
+                      <input type="checkbox" ${item.done ? 'checked' : ''} data-chk-topic="${topic.id}" data-chk-item="${item.id}" class="w-4 h-4 accent-wine-700 rounded cursor-pointer" />
+                      <span class="text-xs font-medium ${item.done ? 'line-through text-latte-500' : 'text-latte-900'}">${esc(item.name)}</span>
+                    </label>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="flex gap-2 pt-2 border-t border-latte-200">
+                <input type="text" id="new-sub-${topic.id}" placeholder="Adicionar matéria/tarefa neste tópico..." class="flex-1 px-3 py-1.5 rounded-xl bg-latte-100 border border-latte-300 text-xs text-latte-900" />
+                <button type="button" data-add-sub="${topic.id}" class="cursor-pointer px-3 py-1.5 rounded-xl bg-latte-200 hover:bg-latte-300 text-wine-800 text-xs font-bold">+ Incluir</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function initScheduleDefaultDate() {
+        const input = document.getElementById('sched-deadline');
+        if (input && !input.value) {
+          const d = new Date();
+          d.setDate(d.getDate() + 30);
+          input.value = d.toISOString().split('T')[0];
+        }
+      }
+
+      async function generateSchedule() {
+        const deadlineStr = document.getElementById('sched-deadline').value;
+        const hours = parseFloat(document.getElementById('sched-hours').value) || 2;
+
+        if (!deadlineStr) {
+          notify('Escolha a data da prova ou entrega.', true);
+          return;
+        }
+
+        const pool = state.materials.length > 0
+          ? state.materials.map(m => {
+              const s = state.subjects.find(sub => sub.id === m.subjectId);
+              return `${s ? s.name : 'Outros'}: ${m.title}`;
+            })
+          : state.subjects.map(s => s.name);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const target = new Date(deadlineStr + 'T00:00:00');
+        const days = Math.max(1, Math.min(60, Math.ceil((target - today) / 86400000)));
+
+        const plan = [];
+        for (let i = 0; i < days; i++) {
+          const day = new Date(today);
+          day.setDate(today.getDate() + i);
+
+          const r7 = new Date(day); r7.setDate(day.getDate() + 7);
+          const r15 = new Date(day); r15.setDate(day.getDate() + 15);
+          const r30 = new Date(day); r30.setDate(day.getDate() + 30);
+
+          plan.push({
+            dayNumber: i + 1,
+            dateStr: day.toLocaleDateString('pt-BR'),
+            topic: pool[i % pool.length],
+            hours,
+            rev7: r7.toLocaleDateString('pt-BR'),
+            rev15: r15.toLocaleDateString('pt-BR'),
+            rev30: r30.toLocaleDateString('pt-BR')
+          });
+        }
+
+        state.schedulePlan = plan;
+        await persistState();
+        renderSchedule();
+        notify('Cronograma criado e salvo com revisões em 7, 15 e 30 dias!');
+      }
+
+      function renderSchedule() {
+        const grid = document.getElementById('schedule-grid');
+        if (!grid) return;
+
+        if (!state.schedulePlan || state.schedulePlan.length === 0) {
+          grid.innerHTML = `
+            <div class="bg-latte-50 border border-latte-300 rounded-2xl p-8 text-center">
+              <p class="font-editorial font-bold text-base text-latte-900">Nenhum cronograma gerado ainda</p>
+              <p class="text-xs text-latte-600 mt-1">Informe a data alvo e suas horas diárias acima para distribuir os estudos e revisões.</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            ${state.schedulePlan.map(item => `
+              <div class="bg-latte-50 border border-latte-300 rounded-2xl p-4 shadow-sm space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-wine-700 text-white text-[11px] font-bold">Dia ${item.dayNumber} • ${esc(item.dateStr)}</span>
+                  <span class="text-xs font-bold text-latte-700">${item.hours}h/dia</span>
+                </div>
+                <p class="text-xs sm:text-sm font-bold text-latte-900">${esc(item.topic)}</p>
+                <div class="pt-2 border-t border-latte-200 flex flex-wrap gap-1.5 text-[10px] font-bold">
+                  <span class="px-2 py-0.5 rounded bg-latte-200 text-wine-800">Rev. 7d: ${esc(item.rev7)}</span>
+                  <span class="px-2 py-0.5 rounded bg-latte-200 text-wine-800">Rev. 15d: ${esc(item.rev15)}</span>
+                  <span class="px-2 py-0.5 rounded bg-latte-200 text-wine-800">Rev. 30d: ${esc(item.rev30)}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      // =======================================================================
+      // 12. RESUMO FLASH (ATÉ 10 PÁGINAS & PEGADINHAS)
+      // =======================================================================
+      function generateResumoFlash(silent = false) {
+        renderAllDirectPickers();
+        const selected = getSelectedMaterials();
+        const container = document.getElementById('printable-resumo');
+        const maxPages = parseInt(document.getElementById('resumo-max-pages').value, 10) || 5;
+        if (!container) return;
+
+        if (selected.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-8">
+              <p class="font-editorial font-bold text-base text-latte-900">Nenhum material selecionado para resumir</p>
+              <p class="text-xs text-latte-600 mt-1">Clique nos cards dos materiais já enviados acima para gerar o Resumo Flash.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const { units } = mineTextKnowledge(selected);
+        const bulletsLimit = maxPages === 2 ? 5 : maxPages === 5 ? 10 : 20;
+
+        container.innerHTML = `
+          <div class="border-b-2 border-wine-700 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-wine-700">Resumo Flash • Máx. ${maxPages} Páginas</span>
+              <h4 class="font-editorial font-bold text-xl text-latte-900 mt-0.5">Pontos Essenciais & Pegadinhas de Prova</h4>
+            </div>
+            <span class="text-xs font-semibold text-latte-600">${selected.length} material(is) selecionado(s)</span>
+          </div>
+
+          <div class="space-y-6">
+            ${selected.map(mat => {
+              const subj = state.subjects.find(s => s.id === mat.subjectId);
+              const matUnits = units.filter(u => u.materialId === mat.id).slice(0, bulletsLimit);
+              const leadFact = matUnits[0] ? matUnits[0].fact : getMaterialFullText(mat);
+
+              return `
+                <article class="space-y-3 pb-5 border-b border-latte-200 last:border-b-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full bg-wine-700 text-white text-[11px] font-bold">${esc(subj ? subj.name : 'Outros')}</span>
+                    <h5 class="font-editorial font-bold text-base text-latte-900">${esc(mat.title)}</h5>
+                    <span class="text-xs text-latte-500">(${esc(mat.reference || mat.type)})</span>
+                  </div>
+
+                  <ul class="space-y-1.5 pl-4 list-disc text-xs sm:text-sm text-latte-800 leading-relaxed">
+                    ${matUnits.map(u => `<li>${esc(u.fact)}</li>`).join('')}
+                  </ul>
+
+                  <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-xs text-amber-950">
+                    <strong>⚠️ Atenção / Pegadinha:</strong> Cuidado com inversões de causa/efeito ou exceções absolutas sobre o trecho: <em>"${esc(trimExcerpt(leadFact, 165))}"</em>.
+                  </div>
+                </article>
+              `;
+            }).join('')}
+          </div>
+        `;
+
+        if (!silent) notify('Resumo Flash gerado exclusivamente a partir dos materiais selecionados!');
+      }
+
+      // =======================================================================
+      // 13. TIMER POMODORO
+      // =======================================================================
+      function refreshPomodoroDisplay() {
+        const el = document.getElementById('pomodoro-display');
+        if (!el) return;
+        const mins = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
+        const secs = String(pomoSeconds % 60).padStart(2, '0');
+        el.textContent = `${mins}:${secs}`;
+      }
+
+      function togglePomodoro() {
+        const btn = document.getElementById('pomodoro-start-btn');
+        if (pomoRunning) {
+          clearInterval(pomoTimer);
+          pomoRunning = false;
+          if (btn) btn.textContent = 'Retomar';
+        } else {
+          pomoRunning = true;
+          if (btn) btn.textContent = 'Pausar';
+          pomoTimer = setInterval(() => {
+            if (pomoSeconds > 0) {
+              pomoSeconds--;
+              refreshPomodoroDisplay();
+            } else {
+              clearInterval(pomoTimer);
+              pomoRunning = false;
+              if (btn) btn.textContent = 'Iniciar';
+              notify('Sessão Pomodoro concluída! Faça uma breve pausa.');
+            }
+          }, 1000);
+        }
+      }
+
+      function resetPomodoro() {
+        clearInterval(pomoTimer);
+        pomoRunning = false;
+        pomoSeconds = 25 * 60;
+        const btn = document.getElementById('pomodoro-start-btn');
+        if (btn) btn.textContent = 'Iniciar';
+        refreshPomodoroDisplay();
+      }
+
+      // =======================================================================
+      // 14. EVENTOS CENTRALIZADOS & DRAG-AND-DROP
+      // =======================================================================
+      function setupEventListeners() {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+          fileInput.addEventListener('change', function (e) {
+            if (e.target.files && e.target.files.length > 0) {
+              window.__athenaeumHandleFiles(e.target.files, e.target);
+            }
+          });
+        }
+
+        const importBackupInput = document.getElementById('import-backup-input');
+        if (importBackupInput) {
+          importBackupInput.addEventListener('change', function (e) {
+            if (e.target.files && e.target.files[0]) {
+              importFullBackupJson(e.target.files[0]);
+            }
+            e.target.value = '';
+          });
+        }
+
+        const dropzone = document.getElementById('vault-dropzone');
+        if (dropzone) {
+          ['dragenter', 'dragover'].forEach(evt => {
+            dropzone.addEventListener(evt, function (e) {
+              e.preventDefault();
+              dropzone.classList.add('bg-wine-50', 'border-wine-700');
+            });
+          });
+          ['dragleave', 'drop'].forEach(evt => {
+            dropzone.addEventListener(evt, function (e) {
+              e.preventDefault();
+              dropzone.classList.remove('bg-wine-50', 'border-wine-700');
+            });
+          });
+          dropzone.addEventListener('drop', function (e) {
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              processUploadedFiles(e.dataTransfer.files);
+            }
+          });
+        }
+
+        document.addEventListener('click', function (e) {
+          const target = e.target;
+
+          // Navegação
+          const navBtn = target.closest('[data-nav]');
+          if (navBtn) {
+            e.preventDefault();
+            switchTab(navBtn.getAttribute('data-nav'));
+            return;
+          }
+
+          if (target.closest('#mobile-menu-btn')) {
+            const nav = document.getElementById('main-nav');
+            if (nav) nav.classList.toggle('hidden');
+            return;
+          }
+
+          if (target.closest('#export-backup-btn')) {
+            exportFullBackupJson();
+            return;
+          }
+
+          // Banner imediato do último texto extraído
+          if (target.closest('#latest-edit-btn') && memoryCache.latestMatId) {
+            openReaderModal(memoryCache.latestMatId);
+            return;
+          }
+          if (target.closest('#latest-close-btn')) {
+            const banner = document.getElementById('latest-extracted-banner');
+            if (banner) banner.classList.add('hidden');
+            return;
+          }
+
+          // Novos botões de anexo alternativo
+          if (target.closest('#modern-picker-btn')) {
+            openModernFilePicker();
+            return;
+          }
+          if (target.closest('#clipboard-import-btn')) {
+            importFromClipboard();
+            return;
+          }
+          if (target.closest('#quick-switch-manual-btn')) {
+            switchToManualMode();
+            return;
+          }
+
+          // Modo de envio (Arquivo vs Manual)
+          if (target.closest('#mode-file-btn')) {
+            document.getElementById('box-upload-file').classList.remove('hidden');
+            document.getElementById('box-upload-manual').classList.add('hidden');
+            document.getElementById('mode-file-btn').className = 'cursor-pointer px-3.5 py-1.5 rounded-lg bg-wine-700 text-white transition';
+            document.getElementById('mode-manual-btn').className = 'cursor-pointer px-3.5 py-1.5 rounded-lg text-latte-800 hover:text-wine-800 transition';
+            return;
+          }
+          if (target.closest('#mode-manual-btn')) {
+            switchToManualMode();
+            return;
+          }
+          if (target.closest('#save-manual-btn')) {
+            saveManualMaterial();
+            return;
+          }
+
+          // Filtros do Acervo
+          const catBtn = target.closest('[data-cat]');
+          if (catBtn) {
+            activeCategoryFilter = catBtn.getAttribute('data-cat');
+            document.querySelectorAll('.cat-pill').forEach(p => {
+              const isMatch = p.getAttribute('data-cat') === activeCategoryFilter;
+              p.className = isMatch
+                ? 'cat-pill cursor-pointer px-3.5 py-1.5 rounded-full text-xs font-bold bg-wine-700 text-white transition'
+                : 'cat-pill cursor-pointer px-3.5 py-1.5 rounded-full text-xs font-bold bg-latte-200 text-latte-800 hover:bg-latte-300 transition';
+            });
+            renderVault();
+            return;
+          }
+
+          // Seleção em massa ou individual
+          const bulkBtn = target.closest('[data-bulk-select]');
+          if (bulkBtn) {
+            bulkSelectMaterials(bulkBtn.getAttribute('data-bulk-select') === 'true');
+            return;
+          }
+          const toggleMatBtn = target.closest('[data-toggle-material]');
+          if (toggleMatBtn) {
+            toggleMaterial(toggleMatBtn.getAttribute('data-toggle-material'));
+            return;
+          }
+
+          // Filtro de matéria nos seletores diretos
+          const pickerSubjBtn = target.closest('[data-picker-subject]');
+          if (pickerSubjBtn) {
+            activePickerSubject = pickerSubjBtn.getAttribute('data-picker-subject');
+            renderAllDirectPickers();
+            return;
+          }
+
+          // Modal de leitura/edição e exclusões
+          const readerBtn = target.closest('[data-open-reader]');
+          if (readerBtn) {
+            openReaderModal(readerBtn.getAttribute('data-open-reader'));
+            return;
+          }
+          if (target.closest('#close-reader-modal-btn') || target.closest('#modal-cancel-btn')) {
+            closeReaderModal();
+            return;
+          }
+          if (target.closest('#modal-save-btn')) {
+            saveReaderModalChanges();
+            return;
+          }
+          if (target.closest('#modal-open-pdf-btn') && editingMaterialId) {
+            openOriginalPdfBlob(editingMaterialId);
+            return;
+          }
+
+          const remMatBtn = target.closest('[data-remove-material]');
+          if (remMatBtn) {
+            removeMaterial(remMatBtn.getAttribute('data-remove-material'));
+            return;
+          }
+          const remSubjBtn = target.closest('[data-remove-subject]');
+          if (remSubjBtn) {
+            removeSubject(remSubjBtn.getAttribute('data-remove-subject'));
+            return;
+          }
+
+          // Questões
+          if (target.closest('#generate-quiz-btn')) {
+            generateQuiz(false);
+            return;
+          }
+          const ansBtn = target.closest('[data-answer-q]');
+          if (ansBtn) {
+            handleAnswerQuestion(
+              parseInt(ansBtn.getAttribute('data-answer-q'), 10),
+              parseInt(ansBtn.getAttribute('data-answer-opt'), 10)
+            );
+            return;
+          }
+
+          // Raio-X
+          if (target.closest('#retry-wrong-btn')) {
+            retryWrongQuestions();
+            return;
+          }
+          if (target.closest('#clear-errors-btn')) {
+            clearErrors();
+            return;
+          }
+
+          // Flashcards
+          if (target.closest('#generate-fc-btn')) {
+            generateFlashcards(false);
+            return;
+          }
+          if (target.closest('#copy-anki-btn')) {
+            copyAnkiCards();
+            return;
+          }
+          if (target.closest('#download-anki-btn')) {
+            downloadAnkiFile();
+            return;
+          }
+          if (target.closest('#fc-card-surface') || target.closest('#fc-flip-btn')) {
+            fcFlipped = !fcFlipped;
+            renderFlashcardsStage();
+            return;
+          }
+          if (target.closest('#fc-prev-btn')) {
+            if (state.flashcards.length > 0) {
+              fcIndex = (fcIndex - 1 + state.flashcards.length) % state.flashcards.length;
+              fcFlipped = false;
+              renderFlashcardsStage();
+            }
+            return;
+          }
+          if (target.closest('#fc-next-btn')) {
+            if (state.flashcards.length > 0) {
+              fcIndex = (fcIndex + 1) % state.flashcards.length;
+              fcFlipped = false;
+              renderFlashcardsStage();
+            }
+            return;
+          }
+
+          // Checklist & Cronograma
+          if (target.closest('#add-chk-topic-btn')) {
+            addChecklistTopic();
+            return;
+          }
+          const delChkBtn = target.closest('[data-del-chk]');
+          if (delChkBtn) {
+            deleteChecklistTopic(delChkBtn.getAttribute('data-del-chk'));
+            return;
+          }
+          const addSubBtn = target.closest('[data-add-sub]');
+          if (addSubBtn) {
+            appendChecklistSubItem(addSubBtn.getAttribute('data-add-sub'));
+            return;
+          }
+          if (target.closest('#generate-sched-btn')) {
+            generateSchedule();
+            return;
+          }
+
+          // Resumo Flash
+          if (target.closest('#generate-resumo-btn')) {
+            generateResumoFlash(false);
+            return;
+          }
+          if (target.closest('#print-resumo-btn')) {
+            window.print();
+            return;
+          }
+
+          // Pomodoro
+          if (target.closest('#pomodoro-start-btn')) {
+            togglePomodoro();
+            return;
+          }
+          if (target.closest('#pomodoro-reset-btn')) {
+            resetPomodoro();
+            return;
+          }
+        });
+
+        document.addEventListener('change', function (e) {
+          const target = e.target;
+          if (target.matches('[data-chk-topic]')) {
+            toggleChecklistItem(
+              target.getAttribute('data-chk-topic'),
+              target.getAttribute('data-chk-item')
+            );
+          } else if (target.id === 'resumo-max-pages') {
+            generateResumoFlash(true);
+          }
+        });
+      }
+
+      // =======================================================================
+      // 15. INICIALIZAÇÃO IMEDIATA DA APLICAÇÃO
+      // =======================================================================
+      function initApp() {
+        try { setupEventListeners(); } catch (e) {}
+        try { updateGlobalIndicators(); } catch (e) {}
+        try { updateSubjectDatalist(); } catch (e) {}
+        try { renderAllDirectPickers(); } catch (e) {}
+        try { refreshPomodoroDisplay(); } catch (e) {}
+        try { switchTab('acervo'); } catch (e) {}
+        try { hydratePersistentVault(); } catch (e) {}
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+      } else {
+        initApp();
+      }
+    })();
+  </script>
+</body>
+</html>
